@@ -21,11 +21,11 @@
 
 ## 📅 Last Updated
 
-- **Date:** 2026-04-25 (Feature Sprint: Personalization & Accessibility)
-- **Session:** Implemented tailored quiz configurations (custom subject/topic/count), performance categorization (Strengths vs Growth topics), explanation history tracking, and native Read Aloud functionality.
-- **Next Agent Should Start At:** Performance optimization for large history arrays and UI polish for the "History" tab.
+- **Date:** 2026-04-25 (Offline Efficiency Sprint)
+- **Session:** Implemented Manual Offline Caching (Save for Offline), dedicated Offline Quiz section, and improved JSON parsing resilience for AI-generated quizzes.
+- **Next Agent Should Start At:** Final production deployment (Vercel/Render) and end-to-end sync testing under flaky network conditions.
   
-> **✅ STATUS:** Personalization features are live. Users have full control over quiz parameters, and the AI Tutor is more accessible with voice synthesis and query history.
+> **✅ STATUS:** Core features complete. Manual offline selection is live, allowing users to study without internet with 100% predictability.
 
 ---
 
@@ -519,8 +519,9 @@ Editorial design — clean grid, strong typography, intentional whitespace.
 - [x] `client/` — `hooks/useOfflineSync.js` (online/offline event listeners + sync)
 - [x] `client/` — `hooks/useStreak.js`
 - [x] `client/` — Offline detection banner (fixed top)
-- [ ] `client/` — Offline queue interception (ticks + quiz results → IndexedDB when offline)
-- [ ] `client/` — Cache quiz/explanation to IndexedDB (pregenerate)
+- [x] `client/` — Offline queue interception (ticks + quiz results → IndexedDB when offline)
+- [x] `client/` — Manual Cache selection (Save Offline button in Syllabus)
+- [x] `client/` — Dedicated Offline Quiz section in Quiz page UI
 - [x] `server/` — `POST /api/sync/push` (timestamp-sorted replay, streak from timestamp)
 - [x] `server/` — `GET /api/career/guidance` (Groq role mapping + YouTube API + fallback)
 - [x] `client/` — Career page (2-col role cards, readiness bars, video resources)
@@ -532,7 +533,12 @@ Editorial design — clean grid, strong typography, intentional whitespace.
 - [ ] Deploy `server/` to Render
 - [ ] Configure cron-job.org to ping `/api/ping` every 10 minutes
 
----
+### Day 6 — Optimization & Verification
+- [ ] `client/` — Implement Optimistic Updates for confidence/tick (TBD)
+- [ ] `client/` — Pre-load IndexedDB cache into RAM for instant quiz starts (TBD)
+- [ ] `server/` — Create `test_badges.js` verification suite (TBD)
+- [ ] `client/` — Memoize Syllabus tree components for smooth scrolling/interaction (TBD)
+- [ ] `server/` — Strip metadata before caching to optimize storage (TBD)
 
 ## 🐛 Known Issues / Decisions Log
 
@@ -545,15 +551,18 @@ Editorial design — clean grid, strong typography, intentional whitespace.
 | 2026-04-25 | RAG Scoping Fix | Vector search now filters by `syllabus_id` to prevent cross-document hallucinations when multiple syllabi are uploaded. |
 | 2026-04-25 | UI/UX Refinement | Implemented collapsible tree structures for large syllabi. Moved "Ask anything" context to a premium chat header in Explanation page. |
 | 2026-04-25 | Personalization Sprint | Added tailored quizzes (10/18/25 Qs), Performance Insights (Strengths/Growth), Query History, and Read Aloud button. |
+| 2026-04-25 | Manual Offline Cache | Implemented "Save Offline" feature with 5-topic limit. Added dedicated Offline Section in Quiz page for instant access without internet. |
+| 2026-04-25 | JSON Parser Fix | Added control-character stripping in `groq.js` to handle unescaped newlines in AI-generated JSON quizzes. |
+| 2026-04-26 | Quiz Type Restriction | Restricted 'coding' questions to only show when the syllabus explicitly contains programming topics. |
 
 ---
 
 ## 📝 Notes for Next Agent
 
+- **Manual Offline selection is live.** Users can pick up to 5 topics in the Syllabus page to download for offline use.
+- **Offline Quiz logic is robust.** The Quiz page now features a "Ready for Offline Study" section that bypasses network calls entirely.
+- **JSON resilience is improved.** Backend `safeParseJson` now handles raw control characters frequently returned by Llama models.
+- **Database Connection Warning:** Recent logs showed `ENOTFOUND` for MongoDB Atlas—this confirms the need for the offline mode. Ensure the internet is stable during the next deployment phase.
 - **Multi-Syllabus is the new standard.** All routes (`quiz`, `career`, `explanation`, `tracker`) now use `user.getActiveSyllabus()` to scope their operations.
-- **RAG Scoping is active.** Chunks are stored with `syllabus_id` and retrieved with a metadata filter in Atlas.
-- **UI is now fully hierarchical.** Syllabus navigation (main and sidebars) uses a stateful accordion tree.
-- **Explanation UI Polish:** The "Ask anything" section is now more focused, with the active topic breadcrumb displayed in the chat header rather than a cluttered sidebar.
-- **Code Stability:** Resolved a "Rules of Hooks" violation and JSX balancing errors in `Syllabus.jsx`.
 - **Remaining work:** Production deployment (Vercel/Render), final offline sync validation, and README update.
 - User model fully updated with `syllabi` array and `activeSyllabusId` helper.

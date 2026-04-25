@@ -65,7 +65,12 @@ const generateQuizQuestions = async (subjectContext, count = 5, level = 'beginne
 Context (strictly test ONLY concepts from this syllabus subset):
 ${JSON.stringify(subjectContext)}
 
-Mix: 70% MCQ, 20% theoretical, 10% coding.
+Rules for Question Types:
+- MCQ: Use for general concepts and definitions.
+- Theoretical: Use for deep explanations or process-based questions.
+- Coding: ONLY use if the topic explicitly involves programming, algorithms, or technical implementation. If the syllabus is theoretical (e.g., History, Management, Pure Science), use 0% coding and replace with MCQ/Theoretical.
+
+Default Mix: 70% MCQ, 20% theoretical, 10% coding (only if applicable).
 Return ONLY a JSON array with this exact strict schema:
 [
   {
