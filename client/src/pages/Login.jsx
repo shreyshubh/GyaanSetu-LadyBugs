@@ -19,9 +19,9 @@ const Login = () => {
       setIsLoading(true);
       await login(email, password);
       if (lang !== 'en') changeLanguage(lang);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login');
+      setError(err.response?.data?.message || t('failed_login', lang));
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +32,7 @@ const Login = () => {
       <div className="card" style={{ width: '100%', maxWidth: '420px' }}>
         <h1 style={{ textAlign: 'center', fontSize: 'var(--text-2xl)' }}>GyaanSetu</h1>
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: '32px' }}>
-          Your personalized learning assistant
+          {t('login_subtitle', lang)}
         </p>
 
         {error && (
@@ -49,7 +49,7 @@ const Login = () => {
               required 
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="student@college.edu"
+              placeholder={t('email_placeholder', lang)}
             />
           </div>
           <div>
@@ -59,7 +59,7 @@ const Login = () => {
               required 
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t('password_placeholder', lang)}
             />
           </div>
 
@@ -83,12 +83,12 @@ const Login = () => {
           </div>
 
           <button type="submit" className="btn-primary" style={{ marginTop: '16px' }} disabled={isLoading}>
-            {isLoading ? 'Logging in...' : t('login', lang)}
+            {isLoading ? t('logging_in', lang) : t('login', lang)}
           </button>
         </form>
 
         <div style={{ marginTop: '16px', textAlign: 'center', fontSize: 'var(--text-sm)' }}>
-          <Link to="/signup" style={{ color: 'var(--accent)' }}>New here? {t('signup', lang)}</Link>
+          <Link to="/signup" style={{ color: 'var(--accent)' }}>{t('new_here', lang)}{t('signup', lang)}</Link>
         </div>
       </div>
     </div>

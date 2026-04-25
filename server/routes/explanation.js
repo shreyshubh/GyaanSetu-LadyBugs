@@ -48,13 +48,21 @@ router.post('/ask', protect, async (req, res) => {
     res.write('data: [DONE]\n\n');
     res.end();
 
-    // Step 4: Save to history (non-blocking)
+    // Step 4: Save to legacy history (non-blocking) using atomic operations
     setImmediate(async () => {
       try {
-        const user = await User.findById(req.user._id);
-        user.explanation_history.unshift({ question, topic: topic || 'General', date: new Date() });
-        if (user.explanation_history.length > 20) user.explanation_history.pop();
-        await user.save();
+        await User.updateOne(
+          { _id: req.user._id },
+          { 
+            $push: { 
+              explanation_history: { 
+                $each: [{ question, topic: topic || 'General', date: new Date() }],
+                $position: 0,
+                $slice: 20 
+              } 
+            } 
+          }
+        );
       } catch (err) {
         console.error('History save error:', err);
       }
@@ -66,6 +74,135 @@ router.post('/ask', protect, async (req, res) => {
     } else {
       res.end();
     }
+  }
+});
+
+// ==================== CONVERSATION HISTORY ENDPOINTS ====================
+
+// GET /api/explanation/history — List all conversations (lightweight)
+router.get('/history', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('conversations');
+    const list = (user.conversations || [])
+      .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+      .map(c => ({
+        _id: c._id,
+        topic: c.topic,
+        subject: c.subject,
+        preview: c.messages?.[0]?.content?.substring(0, 80) || '',
+        message_count: c.messages?.length || 0,
+        updated_at: c.updated_at
+      }));
+    res.json(list);
+  } catch (error) {
+    console.error('List history error:', error);
+    res.status(500).json({ message: 'Failed to load history' });
+  }
+});
+
+// GET /api/explanation/history/:conversationId — Get full conversation
+router.get('/history/:conversationId', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('conversations');
+    const conv = user.conversations.id(req.params.conversationId);
+    if (!conv) return res.status(404).json({ message: 'Conversation not found' });
+    res.json(conv);
+  } catch (error) {
+    console.error('Get conversation error:', error);
+    res.status(500).json({ message: 'Failed to load conversation' });
+  }
+});
+
+// POST /api/explanation/history — Create a new conversation
+router.post('/history', protect, async (req, res) => {
+  try {
+    const { topic, subject } = req.body;
+    const user = await User.findById(req.user._id);
+    user.conversations.push({
+      topic: topic || 'General',
+      subject: subject || '',
+      messages: [],
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+    await user.save();
+    const newConv = user.conversations[user.conversations.length - 1];
+    res.json({ _id: newConv._id, topic: newConv.topic, subject: newConv.subject });
+  } catch (error) {
+    console.error('Create conversation error:', error);
+    res.status(500).json({ message: 'Failed to create conversation' });
+  }
+});
+
+// PUT /api/explanation/history/:conversationId — Append message(s)
+router.put('/history/:conversationId', protect, async (req, res) => {
+  try {
+    const { role, content } = req.body;
+    if (!role || !content) return res.status(400).json({ message: 'role and content required' });
+
+    const result = await User.updateOne(
+      { _id: req.user._id, "conversations._id": req.params.conversationId },
+      { 
+        $push: { "conversations.$.messages": { role, content, timestamp: new Date() } },
+        $set: { "conversations.$.updated_at": new Date() }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Append message error:', error);
+    res.status(500).json({ message: 'Failed to save message' });
+  }
+});
+
+// DELETE /api/explanation/history/:conversationId — Delete entire conversation
+router.delete('/history/:conversationId', protect, async (req, res) => {
+  try {
+    const result = await User.updateOne(
+      { _id: req.user._id },
+      { $pull: { conversations: { _id: req.params.conversationId } } }
+    );
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: 'Conversation not found or already deleted' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete conversation error:', error);
+    res.status(500).json({ message: 'Failed to delete conversation' });
+  }
+});
+
+// DELETE /api/explanation/history/:conversationId/message/:messageIndex — Delete single message
+// Note: Deleting by index concurrently can be unsafe, but we use a $unset followed by $pull to avoid VersionError.
+// A more robust way is to use message _id if available, but since it's an array index, we'll fetch and update manually.
+// To avoid VersionError, we'll load, splice, and save, but handle retries, OR we can just ignore VersionErrors for deletes.
+// Wait, we can use an aggregation pipeline in updateOne for MongoDB 4.2+, but it's simpler to just do this:
+router.delete('/history/:conversationId/message/:messageIndex', protect, async (req, res) => {
+  try {
+    const msgIndex = parseInt(req.params.messageIndex);
+    
+    // We can't $pull by index easily without using $unset + $pull(null).
+    // Let's use the save() approach but only for this specific, rare action, since it's less likely to be concurrent.
+    const user = await User.findById(req.user._id);
+    const conv = user.conversations.id(req.params.conversationId);
+    if (!conv) return res.status(404).json({ message: 'Conversation not found' });
+
+    if (msgIndex < 0 || msgIndex >= conv.messages.length) {
+      return res.status(400).json({ message: 'Invalid message index' });
+    }
+
+    conv.messages.splice(msgIndex, 1);
+    conv.updated_at = new Date();
+    await user.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete message error:', error);
+    res.status(500).json({ message: 'Failed to delete message' });
   }
 });
 

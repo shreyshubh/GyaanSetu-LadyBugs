@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../utils/i18n';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,8 @@ const Syllabus = () => {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [cachedTopics, setCachedTopics] = useState([]);
   const [cachingStatus, setCachingStatus] = useState({}); // { topicName: 'loading' | 'done' | 'error' }
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // null | 'all' | subjectName
+  const [deleting, setDeleting] = useState(false);
 
   const toggleNode = (id) => setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -99,21 +101,29 @@ const Syllabus = () => {
     }
   };
 
-  // Handle study toggle
-  const handleTick = async (subject, unit, topic, studied) => {
+  // Handle study toggle (Optimistic Update)
+  const handleTick = useCallback(async (subject, unit, topic, studied) => {
+    // 1. Optimistic UI update
+    setData(prevData => prevData.map(s => s.name === subject ? {
+      ...s, units: s.units.map(u => u.name === unit ? {
+        ...u, topics: u.topics.map(t => t.name === topic ? { ...t, studied } : t)
+      } : u)
+    } : s));
+
+    // 2. Background API call
     try {
       await axios.put('/api/tracker/tick', { subject, unit, topic, studied });
-      // Refresh syllabus data
-      const { data: res } = await axios.get('/api/syllabus');
-      setData(res.subjects);
+      // Refresh user silently for gamification stats
       refreshUser();
     } catch (err) {
       console.error('Tick error:', err);
+      // Revert is complex without saving full history, so we'll just alert
+      alert(t('sync_failed', lang));
     }
-  };
+  }, [refreshUser, lang]);
 
   // Switch active syllabus
-  const handleSwitchSyllabus = async (id) => {
+  const handleSwitchSyllabus = useCallback(async (id) => {
     try {
       setLoading(true);
       const { data: res } = await axios.put('/api/syllabus/active', { syllabusId: id });
@@ -125,20 +135,27 @@ const Syllabus = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [refreshUser]);
 
-  // Handle confidence change
-  const handleConfidence = async (subject, unit, topic, confidence) => {
+  // Handle confidence change (Optimistic Update)
+  const handleConfidence = useCallback(async (subject, unit, topic, confidence) => {
+    // 1. Optimistic UI update
+    setData(prevData => prevData.map(s => s.name === subject ? {
+      ...s, units: s.units.map(u => u.name === unit ? {
+        ...u, topics: u.topics.map(t => t.name === topic ? { ...t, confidence } : t)
+      } : u)
+    } : s));
+
+    // 2. Background API call
     try {
       await axios.put('/api/tracker/confidence', { subject, unit, topic, confidence });
-      const { data: res } = await axios.get('/api/syllabus');
-      setData(res.subjects);
     } catch (err) {
       console.error('Confidence error:', err);
+      alert(t('sync_failed', lang));
     }
-  };
+  }, [lang]);
 
-  const handleOfflineToggle = async (topic, subjectName, unitName) => {
+  const handleOfflineToggle = useCallback(async (topic, subjectName, unitName) => {
     if (cachedTopics.includes(topic)) {
       await removeFromCache(topic);
       setCachedTopics(prev => prev.filter(t => t !== topic));
@@ -146,7 +163,7 @@ const Syllabus = () => {
     }
 
     if (cachedTopics.length >= 5) {
-      alert('Offline limit reached (5 topics). Uncheck another topic first.');
+      alert(t('offline_sync_limit', lang));
       return;
     }
 
@@ -161,7 +178,12 @@ const Syllabus = () => {
         count: 10,
         subject: subjectName
       });
-      await cacheQuiz(topic, quizRes.questions);
+      // Optimization: Strip metadata before caching to IndexedDB
+      const strippedQuestions = quizRes.questions.map(q => ({
+        type: q.type, question: q.question, options: q.options, 
+        correctIndex: q.correctIndex, correctAnswer: q.correctAnswer, topic: q.topic
+      }));
+      await cacheQuiz(topic, strippedQuestions);
 
       // 3. Pre-fetch explanation (Skip streaming endpoint for now, use placeholder)
       await cacheExplanation(topic, "Offline summary generated. Connect to internet for deep-dive chat.");
@@ -171,12 +193,12 @@ const Syllabus = () => {
     } catch (err) {
       console.error('Caching error:', err);
       setCachingStatus(prev => ({ ...prev, [topic]: 'error' }));
-      alert('Failed to cache topic. Are you online?');
+      alert(t('failed_to_cache', lang));
     }
-  };
+  }, [cachedTopics, lang]);
 
   if (loading) {
-    return <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
+    return <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading', lang)}</div>;
   }
 
   // Show parsed syllabus for review before saving
@@ -185,13 +207,13 @@ const Syllabus = () => {
       <div>
         <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '16px' }}>{t('syllabus', lang)}</h1>
       <div className="card" style={{ padding: '32px' }}>
-        <h2 style={{ marginBottom: '24px' }}>Confirm Syllabus Structure</h2>
+        <h2 style={{ marginBottom: '24px' }}>{t('confirm_syllabus', lang)}</h2>
         <div style={{ marginBottom: '24px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Syllabus Name</label>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('syllabus_name', lang)}</label>
           <input 
             type="text" 
             className="input" 
-            placeholder="e.g., Semester 1 Physics"
+            placeholder={t('syllabus_name_placeholder', lang)}
             value={syllabusName}
             onChange={e => setSyllabusName(e.target.value)}
             style={{ width: '100%', maxWidth: '400px' }}
@@ -242,9 +264,9 @@ const Syllabus = () => {
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save & Start Learning'}
+            {saving ? t('saving', lang) : t('save_start_learning', lang)}
           </button>
-          <button className="btn-secondary" onClick={() => setParsedTopics(null)}>Cancel</button>
+          <button className="btn-secondary" onClick={() => setParsedTopics(null)}>{t('cancel', lang)}</button>
         </div>
       </div>
       </div>
@@ -269,9 +291,9 @@ const Syllabus = () => {
           }}>
           <div style={{ fontSize: '32px', marginBottom: '16px' }}>📄</div>
           <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: '8px' }}>
-            {uploading ? 'Parsing...' : t('upload_syllabus', lang)}
+            {uploading ? t('parsing', lang) : t('upload_syllabus', lang)}
           </h3>
-          <p style={{ color: 'var(--text-secondary)' }}>Click or drag a PDF/DOCX file here</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{t('click_drag_pdf', lang)}</p>
         </div>
       </div>
     );
@@ -297,15 +319,55 @@ const Syllabus = () => {
             </select>
           )}
         </div>
-        <button className="btn-secondary" onClick={() => { setData(null); }}>Upload New Syllabus</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn-secondary" onClick={() => { setData(null); }}>{t('upload_new_syllabus', lang)}</button>
+          <button className="btn-secondary" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={() => setDeleteConfirm('all')} disabled={deleting}>
+            {lang === 'hi' ? '🗑 सब हटाएं' : '🗑 Delete All'}
+          </button>
+        </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div className="card" style={{ marginBottom: '16px', padding: '16px', background: '#FFF5F5', border: '1px solid var(--danger)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--danger)', fontWeight: 600 }}>
+            {deleteConfirm === 'all'
+              ? (lang === 'hi' ? '⚠ क्या आप पूरा पाठ्यक्रम हटाना चाहते हैं?' : '⚠ Delete the entire syllabus and all embeddings?')
+              : (lang === 'hi' ? `⚠ "${deleteConfirm}" हटाएं?` : `⚠ Delete "${deleteConfirm}"?`)
+            }
+          </span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn-primary" style={{ background: 'var(--danger)', padding: '6px 14px', fontSize: 'var(--text-sm)' }}
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true);
+                try {
+                  if (deleteConfirm === 'all') {
+                    await axios.delete('/api/syllabus');
+                    setData([]);
+                  } else {
+                    const { data: res } = await axios.delete(`/api/syllabus/subject/${encodeURIComponent(deleteConfirm)}`);
+                    setData(res.subjects || []);
+                  }
+                  await refreshUser();
+                } catch (err) { console.error('Delete error:', err); }
+                finally { setDeleting(false); setDeleteConfirm(null); }
+              }}>
+              {deleting ? '...' : (lang === 'hi' ? 'हाँ, हटाएं' : 'Yes, Delete')}
+            </button>
+            <button className="btn-secondary" style={{ padding: '6px 14px', fontSize: 'var(--text-sm)' }} onClick={() => setDeleteConfirm(null)}>
+              {t('cancel', lang)}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="card" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--accent-light)', border: '1px solid var(--accent)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '20px' }}>💾</span>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>Offline Mode Ready</div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>You can study these topics even without internet.</div>
+            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>{t('offline_mode_ready', lang)}</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>{t('offline_mode_desc', lang)}</div>
           </div>
         </div>
         <div style={{ fontWeight: 700, color: 'var(--accent)' }}>{cachedTopics.length} / 5 Topics</div>
@@ -316,12 +378,14 @@ const Syllabus = () => {
         const isSubjOpen = expandedNodes[subjId];
         return (
           <div key={sIdx} className="card" style={{ marginBottom: '16px', padding: '24px' }}>
-            <div 
-              onClick={() => toggleNode(subjId)}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-            >
-              <h2 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{subject.name}</h2>
-              <span style={{ fontSize: '20px', transition: 'transform 0.3s', transform: isSubjOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+              <div onClick={() => toggleNode(subjId)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{subject.name}</h2>
+                <span style={{ fontSize: '20px', transition: 'transform 0.3s', transform: isSubjOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(subject.name); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: 'var(--text-muted)', marginLeft: '12px', padding: '4px' }}
+                title={lang === 'hi' ? 'इस विषय को हटाएं' : 'Delete this subject'}>🗑</button>
             </div>
             
             {isSubjOpen && (
@@ -342,48 +406,19 @@ const Syllabus = () => {
                       {isUnitOpen && (
                         <div style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                           {unit.topics.map((topic, tIdx) => (
-                            <div key={tIdx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--bg)', borderRadius: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <input type="checkbox" checked={topic.studied || false}
-                                  onChange={e => handleTick(subject.name, unit.name, topic.name, e.target.checked)}
-                                  style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }} />
-                                <span style={{ fontWeight: 500 }}>{topic.name}</span>
-                              </div>
-                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                {['confident', 'neutral', 'weak'].map(c => (
-                                  <span key={c} className={`tag tag-${c}`}
-                                    style={{ opacity: topic.confidence === c ? 1 : 0.3, cursor: 'pointer' }}
-                                    onClick={() => handleConfidence(subject.name, unit.name, topic.name, c)}>
-                                    {t(c, lang)}
-                                  </span>
-                                ))}
-                                
-                                <div 
-                                  onClick={() => handleOfflineToggle(topic.name, subject.name, unit.name)}
-                                  style={{ 
-                                    cursor: 'pointer', 
-                                    padding: '4px 8px', 
-                                    borderRadius: '4px', 
-                                    fontSize: '11px',
-                                    background: cachedTopics.includes(topic.name) ? 'var(--accent)' : 'transparent',
-                                    color: cachedTopics.includes(topic.name) ? 'white' : 'var(--text-muted)',
-                                    border: `1px solid ${cachedTopics.includes(topic.name) ? 'var(--accent)' : 'var(--border)'}`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    transition: 'all 0.2s'
-                                  }}
-                                >
-                                  {cachingStatus[topic.name] === 'loading' ? '⌛' : '💾'} 
-                                  {cachedTopics.includes(topic.name) ? 'Saved' : 'Save Offline'}
-                                </div>
-
-                                <button onClick={() => navigate(`/notes?topic=${encodeURIComponent(topic.name)}&subject=${encodeURIComponent(subject.name)}&unit=${encodeURIComponent(unit.name)}`)}
-                                  className="btn-secondary" style={{ padding: '4px 8px', fontSize: '11px' }}>
-                                  {t('generate_notes', lang)}
-                                </button>
-                              </div>
-                            </div>
+                            <TopicRow 
+                              key={tIdx} 
+                              topic={topic} 
+                              subjectName={subject.name} 
+                              unitName={unit.name}
+                              lang={lang}
+                              handleTick={handleTick}
+                              handleConfidence={handleConfidence}
+                              handleOfflineToggle={handleOfflineToggle}
+                              isCached={cachedTopics.includes(topic.name)}
+                              cachingStatus={cachingStatus[topic.name]}
+                              navigate={navigate}
+                            />
                           ))}
                         </div>
                       )}
@@ -398,5 +433,53 @@ const Syllabus = () => {
     </div>
   );
 };
+
+// Optimization: Memoize TopicRow to prevent massive re-renders of the syllabus tree
+const TopicRow = memo(({ topic, subjectName, unitName, lang, handleTick, handleConfidence, handleOfflineToggle, isCached, cachingStatus, navigate }) => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--bg)', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <input type="checkbox" checked={topic.studied || false}
+          onChange={e => handleTick(subjectName, unitName, topic.name, e.target.checked)}
+          style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }} />
+        <span style={{ fontWeight: 500 }}>{topic.name}</span>
+      </div>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {['confident', 'neutral', 'weak'].map(c => (
+          <span key={c} className={`tag tag-${c}`}
+            style={{ opacity: topic.confidence === c ? 1 : 0.3, cursor: 'pointer' }}
+            onClick={() => handleConfidence(subjectName, unitName, topic.name, c)}>
+            {t(c, lang)}
+          </span>
+        ))}
+        
+        <div 
+          onClick={() => handleOfflineToggle(topic.name, subjectName, unitName)}
+          style={{ 
+            cursor: 'pointer', 
+            padding: '4px 8px', 
+            borderRadius: '4px', 
+            fontSize: '11px',
+            background: isCached ? 'var(--accent)' : 'transparent',
+            color: isCached ? 'white' : 'var(--text-muted)',
+            border: `1px solid ${isCached ? 'var(--accent)' : 'var(--border)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          {cachingStatus === 'loading' ? '⌛' : '💾'} 
+          {isCached ? t('saved', lang) : t('save_offline', lang)}
+        </div>
+
+        <button onClick={() => navigate(`/notes?topic=${encodeURIComponent(topic.name)}&subject=${encodeURIComponent(subjectName)}&unit=${encodeURIComponent(unitName)}`)}
+          className="btn-secondary" style={{ padding: '4px 8px', fontSize: '11px' }}>
+          {t('generate_notes', lang)}
+        </button>
+      </div>
+    </div>
+  );
+});
 
 export default Syllabus;

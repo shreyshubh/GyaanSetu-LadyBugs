@@ -13,6 +13,10 @@ const Dashboard = () => {
   const strongTopics = allTopics.filter(t => t.studied && t.score >= 90);
   const growthTopics = allTopics.filter(t => t.studied && t.score < 60);
 
+  // Spaced Repetition: Surfaced if last_tested is > 7 days ago
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const reviewTopics = allTopics.filter(t => t.studied && t.last_tested && new Date(t.last_tested) <= sevenDaysAgo);
+
   return (
     <div>
       <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>
@@ -50,10 +54,10 @@ const Dashboard = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
         <div>
-          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--success)' }}>Your Strengths (90%+)</h2>
+          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--success)' }}>{t('your_strengths', lang)}</h2>
           <div className="card" style={{ minHeight: '100px' }}>
             {strongTopics.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>Keep studying and testing to build your strengths!</p>
+              <p style={{ color: 'var(--text-muted)' }}>{t('keep_studying', lang)}</p>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {strongTopics.map((t, i) => (
@@ -67,10 +71,34 @@ const Dashboard = () => {
         </div>
 
         <div>
-          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--danger)' }}>{'Areas for Growth (<60%)'}</h2>
+          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.2em' }}>⏳</span> {lang === 'hi' ? 'पुनरीक्षण के लिए बाकी (स्पेस रिपीटीशन)' : 'Due for Review (Spaced Repetition)'}
+          </h2>
+          <div className="card" style={{ minHeight: '100px' }}>
+            {reviewTopics.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)' }}>{lang === 'hi' ? 'आप बिल्कुल अद्यतित हैं!' : 'You are all caught up!'}</p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {reviewTopics.map((t, i) => (
+                  <span key={i} style={{ background: '#FFF3E0', color: '#E65100', padding: '4px 12px', borderRadius: '4px', fontSize: 'var(--text-sm)', border: '1px solid #FFE0B2', position: 'relative' }}>
+                    {t.name}
+                    <span style={{ fontSize: '10px', display: 'block', opacity: 0.7 }}>
+                      {lang === 'hi' ? `${Math.floor((Date.now() - new Date(t.last_tested).getTime()) / (1000 * 60 * 60 * 24))} दिन पहले` : `${Math.floor((Date.now() - new Date(t.last_tested).getTime()) / (1000 * 60 * 60 * 24))} days ago`}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+        <div>
+          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--danger)' }}>{t('areas_for_growth', lang)}</h2>
           <div className="card" style={{ minHeight: '100px' }}>
             {growthTopics.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>No major gaps found! Keep up the good work.</p>
+              <p style={{ color: 'var(--text-muted)' }}>{t('no_major_gaps', lang)}</p>
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {growthTopics.map((t, i) => (
@@ -84,21 +112,21 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px' }}>Recent Quizzes</h2>
+      <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px' }}>{t('recent_quizzes', lang)}</h2>
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
-              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>Subject</th>
-              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>Score</th>
-              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>Date</th>
+              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>{t('subject', lang)}</th>
+              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>{t('score', lang)}</th>
+              <th style={{ padding: '12px 24px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>{t('date', lang)}</th>
             </tr>
           </thead>
           <tbody>
             {quizHistory.length === 0 ? (
               <tr>
                 <td colSpan="3" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No recent quizzes. Upload a syllabus to begin!
+                  {t('no_recent_quizzes', lang)}
                 </td>
               </tr>
             ) : (

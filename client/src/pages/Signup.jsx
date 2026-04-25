@@ -20,9 +20,9 @@ const Signup = () => {
       setIsLoading(true);
       await signup(name, email, password, lang);
       if (lang !== 'en') changeLanguage(lang);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create account');
+      setError(err.response?.data?.message || t('failed_signup', lang));
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +33,7 @@ const Signup = () => {
       <div className="card" style={{ width: '100%', maxWidth: '420px' }}>
         <h1 style={{ textAlign: 'center', fontSize: 'var(--text-2xl)' }}>GyaanSetu</h1>
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: '32px' }}>
-          {t('signup', lang)}
+          {t('login_subtitle', lang)}
         </p>
 
         {error && (
@@ -50,7 +50,7 @@ const Signup = () => {
               required 
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Riya Singh"
+              placeholder={t('name_placeholder', lang)}
             />
           </div>
           <div>
@@ -60,7 +60,7 @@ const Signup = () => {
               required 
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="student@college.edu"
+              placeholder={t('email_placeholder', lang)}
             />
           </div>
           <div>
@@ -70,7 +70,7 @@ const Signup = () => {
               required 
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t('password_placeholder', lang)}
             />
           </div>
 
@@ -94,12 +94,12 @@ const Signup = () => {
           </div>
 
           <button type="submit" className="btn-primary" style={{ marginTop: '16px' }} disabled={isLoading}>
-            {isLoading ? 'Creating...' : t('signup', lang)}
+            {isLoading ? t('creating', lang) : t('signup', lang)}
           </button>
         </form>
 
         <div style={{ marginTop: '16px', textAlign: 'center', fontSize: 'var(--text-sm)' }}>
-          <Link to="/login" style={{ color: 'var(--accent)' }}>Already have an account? {t('login', lang)}</Link>
+          <Link to="/login" style={{ color: 'var(--accent)' }}>{t('already_have_account', lang)}{t('login', lang)}</Link>
         </div>
       </div>
     </div>

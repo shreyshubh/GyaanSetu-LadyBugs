@@ -54,9 +54,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const changeLanguage = (lang) => {
+  const changeLanguage = async (lang) => {
     if (user) {
       setUser({ ...user, language: lang });
+      try {
+        await axios.put('/api/auth/language', { language: lang });
+      } catch (err) {
+        console.error('Failed to sync language:', err);
+      }
     }
   };
 

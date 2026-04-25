@@ -209,7 +209,18 @@ router.post('/pregenerate', protect, async (req, res) => {
 
     const subjectContext = { subject: 'Mixed Offline Cache', topics: targetTopics.slice(0, 10) };
     const questions = await generateQuizQuestions(subjectContext, 20, level, language);
-    res.json({ questions, topicCount: targetTopics.length });
+    
+    // Optimization: Strip metadata to save IndexedDB storage space on the client
+    const strippedQuestions = questions.map(q => ({
+      type: q.type,
+      question: q.question,
+      options: q.options,
+      correctIndex: q.correctIndex,
+      correctAnswer: q.correctAnswer,
+      topic: q.topic
+    }));
+
+    res.json({ questions: strippedQuestions, topicCount: targetTopics.length });
   } catch (error) {
     console.error('Pregenerate error:', error);
     res.status(500).json({ message: 'Failed to pregenerate questions' });

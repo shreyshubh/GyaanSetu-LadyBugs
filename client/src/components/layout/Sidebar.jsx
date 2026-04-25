@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       
       <nav style={{ flexGrow: 1, padding: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <NavLink 
-          to="/" 
+          to="/dashboard" 
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',

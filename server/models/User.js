@@ -21,6 +21,21 @@ const subjectSchema = new mongoose.Schema({
   units: [unitSchema]
 }, { _id: false });
 
+// Conversation message schema for explanation history
+const conversationMessageSchema = new mongoose.Schema({
+  role: { type: String, enum: ['user', 'assistant'], required: true },
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+}, { _id: false });
+
+const conversationSchema = new mongoose.Schema({
+  topic: String,
+  subject: String,
+  messages: [conversationMessageSchema],
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now }
+});
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -53,11 +68,15 @@ const userSchema = new mongoose.Schema({
     time_taken: Number
   }],
 
+  // Legacy simple explanation history (kept for backwards compat)
   explanation_history: [{
     question: String,
     topic: String,
     date: { type: Date, default: Date.now }
   }],
+
+  // New: full conversation history for explanation page
+  conversations: [conversationSchema],
 
   offline_queue: [{
     type: { type: String },
@@ -69,7 +88,10 @@ const userSchema = new mongoose.Schema({
     strong: [String],
     weak: [String],
     cached_roles: [{ type: mongoose.Schema.Types.Mixed }],
-    cached_resources: [{ type: mongoose.Schema.Types.Mixed }]
+    cached_resources: [{ type: mongoose.Schema.Types.Mixed }],
+    cached_higher_education: [{ type: mongoose.Schema.Types.Mixed }],
+    cached_scholarships: [{ type: mongoose.Schema.Types.Mixed }],
+    salary_cached_at: { type: Date, default: null }
   },
 
   gamification: {

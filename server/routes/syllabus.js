@@ -6,6 +6,7 @@ const mammoth = require('mammoth');
 const { protect } = require('../middleware/auth');
 const { extractSyllabusTopics } = require('../services/groq');
 const { storeEmbeddings } = require('../services/vectorSearch');
+const { pushCareerUpdate } = require('../services/websocket');
 const User = require('../models/User');
 
 /**
@@ -86,6 +87,10 @@ router.post('/save', protect, async (req, res) => {
     }
 
     const activeSyllabus = req.user.syllabi.id(req.user.activeSyllabusId);
+    
+    // Trigger real-time career update
+    setImmediate(() => { pushCareerUpdate(req.user._id); });
+
     res.json({ message: 'Syllabus saved and vectorized!', subjects: activeSyllabus.subjects, activeSyllabusId: req.user.activeSyllabusId, syllabi: req.user.syllabi });
   } catch (error) {
     console.error('Save Error:', error);
@@ -127,6 +132,9 @@ router.put('/active', protect, async (req, res) => {
     req.user.activeSyllabusId = syllabusId;
     await req.user.save();
     
+    // Trigger real-time career update
+    setImmediate(() => { pushCareerUpdate(req.user._id); });
+
     res.json({ message: 'Active syllabus updated', activeSyllabusId: syllabusId, subjects: exists.subjects });
   } catch (error) {
     console.error('Set active syllabus error:', error);
@@ -188,10 +196,87 @@ router.put('/edit', protect, async (req, res) => {
       console.error('Re-embedding warning:', embedErr.message);
     }
 
+    // Trigger real-time career update
+    setImmediate(() => { pushCareerUpdate(req.user._id); });
+
     res.json({ message: 'Syllabus updated!', subjects: activeSyllabus.subjects });
   } catch (error) {
     console.error('Edit error:', error);
     res.status(500).json({ message: 'Failed to edit syllabus' });
+  }
+});
+
+// DELETE /api/syllabus — Delete entire syllabus and cleanup related data
+router.delete('/', protect, async (req, res) => {
+  try {
+    const user = req.user;
+    const Embedding = require('../models/Embedding');
+
+    // Clear active syllabus subjects
+    const activeSyllabus = user.syllabi.id(user.activeSyllabusId);
+    if (activeSyllabus) {
+      activeSyllabus.subjects = [];
+    }
+
+    // Delete ALL embeddings for this user
+    await Embedding.deleteMany({ user_id: user._id.toString() });
+
+    // Reset syllabus-dependent gamification fields (preserve streaks, badges, quiz history)
+    user.gamification.total_topics_studied = 0;
+
+    await user.save();
+
+    // Trigger real-time career update
+    setImmediate(() => { pushCareerUpdate(user._id); });
+
+    res.json({ success: true, message: 'Syllabus and all related embeddings deleted.' });
+  } catch (error) {
+    console.error('Delete syllabus error:', error);
+    res.status(500).json({ message: 'Failed to delete syllabus' });
+  }
+});
+
+// DELETE /api/syllabus/subject/:subjectName — Delete a single subject
+router.delete('/subject/:subjectName', protect, async (req, res) => {
+  try {
+    const user = req.user;
+    const subjectName = decodeURIComponent(req.params.subjectName);
+    const Embedding = require('../models/Embedding');
+
+    const activeSyllabus = user.syllabi.id(user.activeSyllabusId);
+    if (!activeSyllabus) return res.status(404).json({ message: 'Active syllabus not found' });
+
+    // Remove the subject
+    const originalLength = activeSyllabus.subjects.length;
+    activeSyllabus.subjects = activeSyllabus.subjects.filter(s => s.name !== subjectName);
+
+    if (activeSyllabus.subjects.length === originalLength) {
+      return res.status(404).json({ message: 'Subject not found' });
+    }
+
+    // Delete embeddings scoped to that subject
+    await Embedding.deleteMany({ user_id: user._id.toString(), subject: subjectName });
+
+    // Recalculate total_topics_studied
+    let totalStudied = 0;
+    for (const subj of activeSyllabus.subjects) {
+      for (const unit of subj.units) {
+        for (const topic of unit.topics) {
+          if (topic.studied) totalStudied++;
+        }
+      }
+    }
+    user.gamification.total_topics_studied = totalStudied;
+
+    await user.save();
+
+    // Trigger real-time career update
+    setImmediate(() => { pushCareerUpdate(user._id); });
+
+    res.json({ success: true, subjects: activeSyllabus.subjects });
+  } catch (error) {
+    console.error('Delete subject error:', error);
+    res.status(500).json({ message: 'Failed to delete subject' });
   }
 });
 

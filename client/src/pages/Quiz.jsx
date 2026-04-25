@@ -23,17 +23,34 @@ const Quiz = () => {
   const [selectedTopic, setSelectedTopic] = useState('');
   const [qCount, setQCount] = useState(10);
   const [cachedTopics, setCachedTopics] = useState([]);
+  const [quizCacheRAM, setQuizCacheRAM] = useState({}); // Optimization: RAM Cache
 
   useEffect(() => {
     const loadCached = async () => {
       const cached = await getAllCachedTopics();
       setCachedTopics(cached);
+      
+      // Pre-load IndexedDB into RAM for instant starts
+      const ram = {};
+      for (const t of cached) {
+        ram[t] = await getCachedQuiz(t);
+      }
+      setQuizCacheRAM(ram);
     };
     loadCached();
   }, []);
 
   const startQuiz = async (overrideTopic = null) => {
     const topicToUse = overrideTopic || selectedTopic;
+    
+    // Instant RAM Cache Hit (Optimization)
+    if (overrideTopic && quizCacheRAM[overrideTopic]) {
+      setQuestions(quizCacheRAM[overrideTopic].slice(0, qCount)); setCurrentIdx(0); setAnswers([]); setSelected(null);
+      setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
+      setQStart(Date.now()); setTotalStart(Date.now());
+      return;
+    }
+
     setLoading(true);
     try {
       // 1. Try to fetch from server
@@ -47,15 +64,13 @@ const Quiz = () => {
       setQStart(Date.now()); setTotalStart(Date.now());
     } catch (err) { 
       // 2. Fallback to cache if offline or server error
-      if (topicToUse) {
-        const cached = await getCachedQuiz(topicToUse);
-        if (cached) {
-          setQuestions(cached.slice(0, qCount));
-          setCurrentIdx(0); setAnswers([]); setSelected(null);
-          setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
-          setQStart(Date.now()); setTotalStart(Date.now());
-          return;
-        }
+      if (topicToUse && quizCacheRAM[topicToUse]) {
+        setQuestions(quizCacheRAM[topicToUse].slice(0, qCount));
+        setCurrentIdx(0); setAnswers([]); setSelected(null);
+        setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
+        setQStart(Date.now()); setTotalStart(Date.now());
+        setLoading(false);
+        return;
       }
       alert(err.response?.data?.message || 'Failed to generate quiz. Try saving it offline first!'); 
     }
@@ -118,10 +133,10 @@ const Quiz = () => {
 
   if (results) return (
     <div>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>Quiz Results</h1>
+      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('quiz_results', lang)}</h1>
       <div className="card" style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: results.scorePercent >= 70 ? 'var(--success)' : 'var(--danger)', marginBottom: '8px' }}>{results.scorePercent}%</div>
-        <div style={{ color: 'var(--text-secondary)' }}>Level: {results.level}</div>
+        <div style={{ color: 'var(--text-secondary)' }}>{t('level', lang)}: {results.level}</div>
       </div>
       {results.results.map((r, i) => (
         <div key={i} className="card" style={{ marginBottom: '12px', borderLeft: `3px solid ${r.score >= 70 ? 'var(--success)' : 'var(--danger)'}` }}>
@@ -130,7 +145,7 @@ const Quiz = () => {
           <div style={{ color: r.score >= 70 ? 'var(--success)' : 'var(--danger)', fontSize: 'var(--text-sm)' }}>{r.feedback}</div>
         </div>
       ))}
-      <button className="btn-primary" onClick={() => { setQuestions([]); setResults(null); }} style={{ width: '100%', marginTop: '24px' }}>Take Another Quiz</button>
+      <button className="btn-primary" onClick={() => { setQuestions([]); setResults(null); }} style={{ width: '100%', marginTop: '24px' }}>{t('take_another_quiz', lang)}</button>
     </div>
   );
 
@@ -145,29 +160,29 @@ const Quiz = () => {
       <div>
         <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('quiz', lang)}</h1>
         {subjects.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: '48px' }}><p style={{ color: 'var(--text-muted)' }}>Upload a syllabus and study some topics first!</p></div>
+          <div className="card" style={{ textAlign: 'center', padding: '48px' }}><p style={{ color: 'var(--text-muted)' }}>{t('upload_syllabus_first', lang)}</p></div>
         ) : (
           <div className="card" style={{ maxWidth: '600px', margin: '0 auto', padding: '32px' }}>
-            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '24px' }}>Configure Your Quiz</h2>
+            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '24px' }}>{t('configure_quiz', lang)}</h2>
             
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Select Subject</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('select_subject', lang)}</label>
               <select className="input" value={selectedSubject} onChange={e => { setSelectedSubject(e.target.value); setSelectedTopic(''); }} style={{ width: '100%' }}>
-                <option value="">All Subjects</option>
+                <option value="">{t('all_subjects', lang)}</option>
                 {subjects.map((s, i) => <option key={i} value={s.name}>{s.name}</option>)}
               </select>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Select Topic (Optional)</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('select_topic_optional', lang)}</label>
               <select className="input" value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={{ width: '100%' }}>
-                <option value="">All Topics in Subject</option>
+                <option value="">{t('all_topics_subject', lang)}</option>
                 {allTopics.map((t, i) => <option key={i} value={t.name}>{t.name}</option>)}
               </select>
             </div>
 
             <div style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Question Count</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('question_count', lang)}</label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 {[10, 18, 25].map(c => (
                   <button 
@@ -183,12 +198,12 @@ const Quiz = () => {
             </div>
 
             <button className="btn-primary" onClick={() => startQuiz()} disabled={loading} style={{ width: '100%', padding: '16px' }}>
-              {loading ? 'Generating...' : 'Start Quiz'}
+              {loading ? t('generating', lang) : t('start_quiz', lang)}
             </button>
 
             {cachedTopics.length > 0 && (
               <div style={{ marginTop: '40px' }}>
-                <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Ready for Offline Study</h3>
+                <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>{t('ready_offline_study', lang)}</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   {cachedTopics.map((topic, i) => (
                     <div 
@@ -198,7 +213,7 @@ const Quiz = () => {
                       style={{ padding: '12px', cursor: 'pointer', border: '1px solid var(--accent)', background: 'var(--accent-light)', position: 'relative' }}
                     >
                       <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>{topic}</div>
-                      <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: '4px' }}>💾 Available Offline</div>
+                      <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: '4px' }}>💾 {t('available_offline', lang)}</div>
                     </div>
                   ))}
                 </div>
@@ -219,7 +234,7 @@ const Quiz = () => {
         </div>
         <div style={{ padding: '32px' }}>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Question {currentIdx + 1}/{questions.length} • {currentQ?.topic}
+            {t('question', lang)} {currentIdx + 1}/{questions.length} • {currentQ?.topic}
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', marginBottom: '32px' }}>{currentQ?.question}</div>
           {currentQ?.type === 'mcq' ? (
@@ -233,13 +248,13 @@ const Quiz = () => {
             </div>
           ) : (
             <textarea value={textAnswer} onChange={e => setTextAnswer(e.target.value)} disabled={submitted}
-              placeholder={currentQ?.type === 'coding' ? 'Write your code...' : 'Type your answer...'}
+              placeholder={currentQ?.type === 'coding' ? t('write_code', lang) : t('type_answer', lang)}
               style={{ width: '100%', minHeight: '120px', marginBottom: '32px', padding: '16px', borderRadius: '6px', border: '1px solid var(--border)', fontFamily: currentQ?.type === 'coding' ? 'var(--font-mono)' : 'var(--font-body)', background: currentQ?.type === 'coding' ? 'var(--code-bg)' : 'var(--surface)', resize: 'vertical' }} />
           )}
           {!submitted ? (
-            <button className="btn-primary" onClick={handleSubmitAnswer} disabled={currentQ?.type === 'mcq' ? selected === null : !textAnswer.trim()} style={{ width: '100%' }}>Submit Answer</button>
+            <button className="btn-primary" onClick={handleSubmitAnswer} disabled={currentQ?.type === 'mcq' ? selected === null : !textAnswer.trim()} style={{ width: '100%' }}>{t('submit_answer', lang)}</button>
           ) : (
-            <button className="btn-secondary" onClick={handleNext} style={{ width: '100%' }}>{currentIdx < questions.length - 1 ? 'Next Question' : loading ? 'Grading...' : 'See Results'}</button>
+            <button className="btn-secondary" onClick={handleNext} style={{ width: '100%' }}>{currentIdx < questions.length - 1 ? t('next_question', lang) : loading ? t('grading', lang) : t('see_results', lang)}</button>
           )}
         </div>
       </div>
