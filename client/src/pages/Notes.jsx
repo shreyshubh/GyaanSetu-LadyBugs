@@ -52,7 +52,7 @@ const Notes = () => {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <style>{styleSheet}</style>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           {subject && <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>{subject} • {unit}</h3>}
           <h1 style={{ fontSize: 'var(--text-2xl)' }}>{topic}</h1>

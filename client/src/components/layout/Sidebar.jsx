@@ -23,6 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <nav style={{ flexGrow: 1, padding: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <NavLink 
           to="/dashboard" 
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',
@@ -37,6 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
         <NavLink 
           to="/syllabus"
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',
@@ -51,6 +53,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
         <NavLink 
           to="/quiz"
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',
@@ -65,6 +68,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
         <NavLink 
           to="/explanation"
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',
@@ -79,6 +83,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
         <NavLink 
           to="/career"
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',
@@ -93,6 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </NavLink>
         <NavLink 
           to="/profile"
+          onClick={onClose}
           style={({ isActive }) => ({
             padding: '12px 16px',
             margin: '0 16px',

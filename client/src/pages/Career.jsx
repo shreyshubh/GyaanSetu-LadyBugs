@@ -67,7 +67,7 @@ const Career = () => {
       <style>{`@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }`}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <h1 style={{ fontSize: 'var(--text-xl)', margin: 0 }}>{t('career_guidance', lang)}</h1>
         <button className="btn-primary" onClick={() => fetchGuidance(true)} disabled={loading}>
           {t('recalculate_career_map', lang)}
@@ -93,7 +93,7 @@ const Career = () => {
         <div style={{ display: 'grid', gap: '24px' }}>
           {roles.map((role, idx) => (
             <div key={idx} className="card" style={{ padding: '28px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
                 <div>
                   <h3 style={{ fontSize: 'var(--text-lg)', margin: '0 0 4px 0' }}>{role.title}</h3>
                   <span className="tag" style={{ background: role.status === 'ready' ? 'var(--success)' : 'var(--warning)', color: '#fff', border: 'none', fontSize: 'var(--text-xs)' }}>
@@ -115,7 +115,7 @@ const Career = () => {
 
               {/* Salary data */}
               {role.avg_lpa && (
-                <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                   <div>
                     <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                       {lang === 'hi' ? '💰 वेतन (भारत)' : '💰 Salary (India)'}
@@ -193,7 +193,7 @@ const Career = () => {
             </div>
           ) : scholarships.map((s, idx) => (
             <div key={idx} className="card" style={{ padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h3 style={{ fontSize: 'var(--text-md)', margin: '0 0 4px' }}>{s.name}</h3>
                   <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>{s.provider}</span>

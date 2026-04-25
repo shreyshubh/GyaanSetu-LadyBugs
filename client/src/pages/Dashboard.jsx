@@ -23,7 +23,7 @@ const Dashboard = () => {
         {t('welcome', lang)}, {user?.name?.split(' ')[0]}
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
+      <div className="grid-3" style={{ marginBottom: '40px' }}>
         <div className="card" style={{ background: '#FFF0EE' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--accent)' }}>
             🔥 {g.current_streak || 0}
@@ -52,7 +52,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+      <div className="grid-2" style={{ marginBottom: '40px' }}>
         <div>
           <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--success)' }}>{t('your_strengths', lang)}</h2>
           <div className="card" style={{ minHeight: '100px' }}>
@@ -93,7 +93,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+      <div className="grid-2" style={{ marginBottom: '40px' }}>
         <div>
           <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--danger)' }}>{t('areas_for_growth', lang)}</h2>
           <div className="card" style={{ minHeight: '100px' }}>

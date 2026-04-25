@@ -46,7 +46,7 @@ const Profile = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)' }}>{initials}</div>
           <div>
@@ -57,7 +57,7 @@ const Profile = () => {
         <button onClick={logout} className="btn-secondary">{t('log_out', lang)}</button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '48px' }}>
+      <div className="grid-4" style={{ marginBottom: '48px' }}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)' }}>🔥 {g.current_streak || 0}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('streak', lang)}</div>

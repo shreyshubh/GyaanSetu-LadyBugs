@@ -204,7 +204,7 @@ const Quiz = () => {
             {cachedTopics.length > 0 && (
               <div style={{ marginTop: '40px' }}>
                 <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>{t('ready_offline_study', lang)}</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="grid-2" style={{ gap: '12px' }}>
                   {cachedTopics.map((topic, i) => (
                     <div 
                       key={i} 

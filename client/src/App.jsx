@@ -26,7 +26,7 @@ const OfflineBanner = () => {
   const text = !isOnline ? `⚡ ${t('you_are_offline', lang)}` : syncStatus === 'syncing' ? `🔄 ${t('syncing', lang)}` : syncStatus === 'synced' ? `✅ ${t('synced', lang)}!` : `❌ ${t('sync_failed', lang)}`;
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, background: bg, color: '#fff', textAlign: 'center', padding: '8px', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}>
+    <div style={{ position: 'sticky', top: 0, left: 0, right: 0, zIndex: 9999, background: bg, color: '#fff', textAlign: 'center', padding: '8px', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>
       {text}
     </div>
   );
@@ -41,6 +41,7 @@ const ProtectedRoute = ({ children }) => {
   
   return (
     <div className="layout-container">
+      <OfflineBanner />
       <div className={`mobile-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="main-content">

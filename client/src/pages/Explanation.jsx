@@ -5,7 +5,17 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const styleSheet = `@keyframes blink { 50% { opacity: 0; } }
-@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }`;
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+.explanation-layout { display: flex; gap: 24px; height: calc(100vh - 64px); }
+.history-panel { flex: 0 0 22%; overflow-y: auto; display: flex; flex-direction: column; padding: 20px; }
+.context-panel { flex: 0 0 25%; overflow-y: auto; display: flex; flex-direction: column; }
+.chat-panel { flex: 1; display: flex; flex-direction: column; padding: 0; }
+@media (max-width: 1024px) {
+  .explanation-layout { flex-direction: column; height: auto; min-height: calc(100vh - 64px); }
+  .history-panel { flex: none; height: 250px; }
+  .context-panel { flex: none; height: 250px; }
+  .chat-panel { flex: none; min-height: 60vh; }
+}`;
 
 const Explanation = () => {
   const { user } = useAuth();
@@ -189,11 +199,11 @@ const Explanation = () => {
   );
 
   return (
-    <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 64px)' }}>
+    <div className="explanation-layout">
       <style>{styleSheet}</style>
 
       {/* LEFT PANEL — History */}
-      <div className="card" style={{ flex: '0 0 22%', overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '20px' }}>
+      <div className="card history-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ fontSize: 'var(--text-md)', margin: 0 }}>{lang === 'hi' ? 'पिछली बातचीत' : 'Past Conversations'}</h3>
           <button onClick={newChat} className="btn-primary" style={{ padding: '4px 12px', fontSize: 'var(--text-xs)' }}>＋ {lang === 'hi' ? 'नई चैट' : 'New Chat'}</button>
@@ -223,7 +233,7 @@ const Explanation = () => {
       </div>
 
       {/* MIDDLE PANEL — Context */}
-      <div className="card" style={{ flex: '0 0 25%', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div className="card context-panel">
         <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', borderBottom: '1px solid var(--border)' }}>
           <button onClick={() => setActiveTab('context')} style={{ flex: 1, padding: '8px', background: 'none', border: 'none', borderBottom: activeTab === 'context' ? '2px solid var(--accent)' : 'none', color: activeTab === 'context' ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: activeTab === 'context' ? '600' : '400', cursor: 'pointer', fontSize: 'var(--text-xs)', textTransform: 'uppercase' }}>{t('context', lang)}</button>
           <button onClick={() => setActiveTab('history')} style={{ flex: 1, padding: '8px', background: 'none', border: 'none', borderBottom: activeTab === 'history' ? '2px solid var(--accent)' : 'none', color: activeTab === 'history' ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: activeTab === 'history' ? '600' : '400', cursor: 'pointer', fontSize: 'var(--text-xs)', textTransform: 'uppercase' }}>{t('history', lang)}</button>
@@ -281,7 +291,7 @@ const Explanation = () => {
       </div>
 
       {/* RIGHT PANEL — Chat */}
-      <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0 }}>
+      <div className="card chat-panel">
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{currentTopic || t('ask_anything', lang)}</h2>

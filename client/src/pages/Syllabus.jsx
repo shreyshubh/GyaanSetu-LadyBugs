@@ -329,14 +329,14 @@ const Syllabus = () => {
 
       {/* Delete confirmation modal */}
       {deleteConfirm && (
-        <div className="card" style={{ marginBottom: '16px', padding: '16px', background: '#FFF5F5', border: '1px solid var(--danger)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="card" style={{ marginBottom: '16px', padding: '16px', background: '#FFF5F5', border: '1px solid var(--danger)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <span style={{ fontSize: 'var(--text-sm)', color: 'var(--danger)', fontWeight: 600 }}>
             {deleteConfirm === 'all'
               ? (lang === 'hi' ? '⚠ क्या आप पूरा पाठ्यक्रम हटाना चाहते हैं?' : '⚠ Delete the entire syllabus and all embeddings?')
               : (lang === 'hi' ? `⚠ "${deleteConfirm}" हटाएं?` : `⚠ Delete "${deleteConfirm}"?`)
             }
           </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button className="btn-primary" style={{ background: 'var(--danger)', padding: '6px 14px', fontSize: 'var(--text-sm)' }}
               disabled={deleting}
               onClick={async () => {
@@ -362,7 +362,7 @@ const Syllabus = () => {
         </div>
       )}
 
-      <div className="card" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--accent-light)', border: '1px solid var(--accent)' }}>
+      <div className="card" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', background: 'var(--accent-light)', border: '1px solid var(--accent)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '20px' }}>💾</span>
           <div>
@@ -437,14 +437,14 @@ const Syllabus = () => {
 // Optimization: Memoize TopicRow to prevent massive re-renders of the syllabus tree
 const TopicRow = memo(({ topic, subjectName, unitName, lang, handleTick, handleConfidence, handleOfflineToggle, isCached, cachingStatus, navigate }) => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--bg)', borderRadius: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--bg)', borderRadius: '8px', flexWrap: 'wrap', gap: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <input type="checkbox" checked={topic.studied || false}
           onChange={e => handleTick(subjectName, unitName, topic.name, e.target.checked)}
           style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }} />
         <span style={{ fontWeight: 500 }}>{topic.name}</span>
       </div>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
         {['confident', 'neutral', 'weak'].map(c => (
           <span key={c} className={`tag tag-${c}`}
             style={{ opacity: topic.confidence === c ? 1 : 0.3, cursor: 'pointer' }}
