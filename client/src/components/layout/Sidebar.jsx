@@ -7,19 +7,21 @@ const Sidebar = () => {
   const lang = user?.language || 'en';
   return (
     <aside className="sidebar">
-      <div style={{ padding: '24px', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '32px 24px 24px', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)' }}>
         GyaanSetu
       </div>
       
-      <nav style={{ flexGrow: 1, paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <nav style={{ flexGrow: 1, padding: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <NavLink 
           to="/" 
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('dashboard', lang)}
@@ -27,11 +29,13 @@ const Sidebar = () => {
         <NavLink 
           to="/syllabus"
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('syllabus', lang)}
@@ -39,11 +43,13 @@ const Sidebar = () => {
         <NavLink 
           to="/quiz"
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('quiz', lang)}
@@ -51,11 +57,13 @@ const Sidebar = () => {
         <NavLink 
           to="/explanation"
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('explanation', lang)}
@@ -63,11 +71,13 @@ const Sidebar = () => {
         <NavLink 
           to="/career"
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('career', lang)}
@@ -75,18 +85,20 @@ const Sidebar = () => {
         <NavLink 
           to="/profile"
           style={({ isActive }) => ({
-            padding: '10px 16px',
+            padding: '12px 16px',
+            margin: '0 16px',
+            borderRadius: '12px',
             color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-            borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
-            paddingLeft: isActive ? '13px' : '16px',
-            fontWeight: isActive ? 600 : 400
+            background: isActive ? 'var(--accent-light)' : 'transparent',
+            fontWeight: isActive ? 700 : 600,
+            transition: 'all 200ms ease'
           })}
         >
           {t('profile', lang)}
         </NavLink>
       </nav>
 
-      <div style={{ padding: '24px', borderTop: '1px solid var(--border)' }}>
+      <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
           <button 
             onClick={() => changeLanguage('en')}

@@ -34,8 +34,8 @@ const Quiz = () => {
       <div className="card" style={{ padding: 0, overflow: 'hidden', maxWidth: '800px', margin: '0 auto' }}>
         {/* Timer Bar */}
         <div style={{ width: '100%', height: '2px', background: 'var(--border)' }}>
-          <div style={{ 
-            height: '100%', 
+          <div style={{
+            height: '100%',
             width: `${(timeLeft / 30) * 100}%`,
             background: timeLeft < 10 ? 'var(--danger)' : 'var(--accent)',
             transition: 'width 1s linear, background 0.3s'
@@ -71,10 +71,10 @@ const Quiz = () => {
               }
 
               return (
-                <div 
+                <div
                   key={idx}
                   onClick={() => !submitted && setSelected(idx)}
-                  style={{ 
+                  style={{
                     border: `1px solid ${borderColor}`,
                     background: bg,
                     padding: '16px',
@@ -89,8 +89,8 @@ const Quiz = () => {
           </div>
 
           {!submitted ? (
-            <button 
-              className="btn-primary" 
+            <button
+              className="btn-primary"
               onClick={() => setSubmitted(true)}
               disabled={selected === null}
               style={{ width: '100%', opacity: selected === null ? 0.5 : 1 }}

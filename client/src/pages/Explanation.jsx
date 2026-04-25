@@ -37,7 +37,7 @@ const Explanation = () => {
   return (
     <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 64px)' }}>
       <style>{styleSheet}</style>
-      
+
       {/* Context Panel (30%) */}
       <div className="card" style={{ flex: '0 0 30%', overflowY: 'auto' }}>
         <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Current Topic Context</h3>
@@ -56,15 +56,15 @@ const Explanation = () => {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {messages.map((msg, idx) => (
-            <div key={idx} style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+            <div key={idx} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start'
             }}>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
                 {msg.role === 'user' ? user?.name : 'GyaanSetu AI'}
               </div>
-              <div style={{ 
+              <div style={{
                 background: msg.role === 'user' ? 'var(--accent-light)' : 'var(--surface)',
                 border: msg.role === 'assistant' ? '1px solid var(--border)' : 'none',
                 padding: '12px 16px',
@@ -78,7 +78,7 @@ const Explanation = () => {
 
           {isStreaming && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>
                 GyaanSetu AI
               </div>
               <div style={{ padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px' }}>
@@ -90,9 +90,9 @@ const Explanation = () => {
 
         <div style={{ padding: '24px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
           <form style={{ display: 'flex', gap: '12px' }} onSubmit={handleSend}>
-            <input 
-              type="text" 
-              placeholder="Ask a clarifying question..." 
+            <input
+              type="text"
+              placeholder="Ask a clarifying question..."
               value={inputText}
               onChange={e => setInputText(e.target.value)}
               disabled={isStreaming}

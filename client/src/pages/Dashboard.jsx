@@ -12,29 +12,29 @@ const Dashboard = () => {
       </h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
-        <div className="card">
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--text-primary)' }}>
-            {user?.gamification?.current_streak}
+        <div className="card" style={{ background: '#FFF0EE' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--accent)' }}>
+            🔥 {user?.gamification?.current_streak}
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <div style={{ color: 'var(--text-primary)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
             {t('streak', lang)}
           </div>
         </div>
         
-        <div className="card">
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--text-primary)' }}>
+        <div className="card" style={{ background: '#EAF9F4' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--success)' }}>
             {user?.gamification?.total_topics_studied}
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <div style={{ color: 'var(--text-primary)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
             {t('topics_studied', lang)}
           </div>
         </div>
 
-        <div className="card">
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--text-primary)' }}>
+        <div className="card" style={{ background: '#FFF7EB' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: 'var(--warning)' }}>
             {user?.gamification?.total_quizzes_taken}
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <div style={{ color: 'var(--text-primary)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
             {t('quizzes_taken', lang)}
           </div>
         </div>
