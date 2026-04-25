@@ -2,13 +2,22 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { t } from '../../utils/i18n';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user, changeLanguage } = useAuth();
   const lang = user?.language || 'en';
   return (
-    <aside className="sidebar">
-      <div style={{ padding: '32px 24px 24px', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)' }}>
-        GyaanSetu
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <div style={{ padding: '32px 24px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)' }}>
+          GyaanSetu
+        </div>
+        <button 
+          onClick={onClose} 
+          style={{ display: 'none', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+          className="mobile-close-btn"
+        >
+          ✕
+        </button>
       </div>
       
       <nav style={{ flexGrow: 1, padding: '0', display: 'flex', flexDirection: 'column', gap: '8px' }}>

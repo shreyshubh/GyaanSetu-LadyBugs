@@ -8,13 +8,24 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [lang, setLang] = useState('en');
-  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { signup, changeLanguage } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    login(email, password, lang); // Mock login after signup
-    navigate('/');
+    try {
+      setError('');
+      setIsLoading(true);
+      await signup(name, email, password, lang);
+      if (lang !== 'en') changeLanguage(lang);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -24,6 +35,12 @@ const Signup = () => {
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', marginBottom: '32px' }}>
           {t('signup', lang)}
         </p>
+
+        {error && (
+          <div style={{ background: 'var(--danger)', color: 'white', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: 'var(--text-sm)', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
@@ -76,8 +93,8 @@ const Signup = () => {
             </button>
           </div>
 
-          <button type="submit" className="btn-primary" style={{ marginTop: '16px' }}>
-            {t('signup', lang)}
+          <button type="submit" className="btn-primary" style={{ marginTop: '16px' }} disabled={isLoading}>
+            {isLoading ? 'Creating...' : t('signup', lang)}
           </button>
         </form>
 
