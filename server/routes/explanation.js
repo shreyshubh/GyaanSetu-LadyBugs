@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const { generateExplanationStream } = require('../services/groq');
 const { retrieveChunks } = require('../services/vectorSearch');
+const User = require('../models/User');
 
 // POST /api/explanation/ask — RAG-powered explanation with streaming
 router.post('/ask', protect, async (req, res) => {
@@ -46,6 +47,18 @@ router.post('/ask', protect, async (req, res) => {
 
     res.write('data: [DONE]\n\n');
     res.end();
+
+    // Step 4: Save to history (non-blocking)
+    setImmediate(async () => {
+      try {
+        const user = await User.findById(req.user._id);
+        user.explanation_history.unshift({ question, topic: topic || 'General', date: new Date() });
+        if (user.explanation_history.length > 20) user.explanation_history.pop();
+        await user.save();
+      } catch (err) {
+        console.error('History save error:', err);
+      }
+    });
   } catch (error) {
     console.error('Explanation error:', error);
     if (!res.headersSent) {

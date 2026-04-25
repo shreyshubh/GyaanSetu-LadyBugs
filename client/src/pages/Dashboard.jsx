@@ -7,6 +7,12 @@ const Dashboard = () => {
   const g = user?.gamification || {};
   const quizHistory = user?.quiz_history || [];
 
+  const activeSyllabus = user?.syllabi?.find(s => s._id === user.activeSyllabusId) || user?.syllabi?.[0] || user?.syllabus;
+  const allTopics = activeSyllabus?.subjects?.flatMap(s => s.units.flatMap(u => u.topics)) || [];
+  
+  const strongTopics = allTopics.filter(t => t.studied && t.score >= 90);
+  const growthTopics = allTopics.filter(t => t.studied && t.score < 60);
+
   return (
     <div>
       <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>
@@ -38,6 +44,42 @@ const Dashboard = () => {
           </div>
           <div style={{ color: 'var(--text-primary)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
             {t('quizzes_taken', lang)}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+        <div>
+          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--success)' }}>Your Strengths (90%+)</h2>
+          <div className="card" style={{ minHeight: '100px' }}>
+            {strongTopics.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)' }}>Keep studying and testing to build your strengths!</p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {strongTopics.map((t, i) => (
+                  <span key={i} style={{ background: '#E6F4ED', color: 'var(--success)', padding: '4px 12px', borderRadius: '4px', fontSize: 'var(--text-sm)', border: '1px solid #C4E9D5' }}>
+                    {t.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px', color: 'var(--danger)' }}>{'Areas for Growth (<60%)'}</h2>
+          <div className="card" style={{ minHeight: '100px' }}>
+            {growthTopics.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)' }}>No major gaps found! Keep up the good work.</p>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {growthTopics.map((t, i) => (
+                  <span key={i} style={{ background: '#FDECEA', color: 'var(--danger)', padding: '4px 12px', borderRadius: '4px', fontSize: 'var(--text-sm)', border: '1px solid #F9D0CB' }}>
+                    {t.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -93,4 +93,25 @@ export const getCachedExplanation = async (topic) => {
   });
 };
 
+export const removeFromCache = async (topic) => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(['quiz_cache', 'explanation_cache'], 'readwrite');
+    tx.objectStore('quiz_cache').delete(topic);
+    tx.objectStore('explanation_cache').delete(topic);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+export const getAllCachedTopics = async () => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('quiz_cache', 'readonly');
+    const request = tx.objectStore('quiz_cache').getAllKeys();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
 export default openDB;

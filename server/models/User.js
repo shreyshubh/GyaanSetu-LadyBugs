@@ -53,6 +53,12 @@ const userSchema = new mongoose.Schema({
     time_taken: Number
   }],
 
+  explanation_history: [{
+    question: String,
+    topic: String,
+    date: { type: Date, default: Date.now }
+  }],
+
   offline_queue: [{
     type: { type: String },
     data: { type: mongoose.Schema.Types.Mixed },

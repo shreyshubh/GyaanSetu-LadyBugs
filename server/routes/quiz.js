@@ -7,7 +7,7 @@ const { checkBadges } = require('../services/badges');
 // POST /api/quiz/generate — Adaptive quiz generation
 router.post('/generate', protect, async (req, res) => {
   try {
-    const { subject, count = 5 } = req.body;
+    const { subject, topic, count = 5 } = req.body;
     const user = req.user;
     const level = user.pacing_profile?.level || 'beginner';
     const language = user.language || 'en';
@@ -22,9 +22,11 @@ router.post('/generate', protect, async (req, res) => {
       
       for (const subj of subjects) {
         for (const unit of subj.units) {
-          for (const topic of unit.topics) {
-            if (topic.studied) {
-              candidateTopics.push({ name: topic.name, priority: topic.quiz_priority || 'medium' });
+          for (const t of unit.topics) {
+            // Include if studied OR if this is the specific topic requested for caching
+            if (t.studied || (topic && t.name === topic)) {
+              if (topic && t.name !== topic) continue;
+              candidateTopics.push({ name: t.name, priority: t.quiz_priority || 'medium' });
             }
           }
         }
@@ -32,7 +34,7 @@ router.post('/generate', protect, async (req, res) => {
     }
 
     if (candidateTopics.length === 0) {
-      return res.status(400).json({ message: 'No studied topics found. Study some topics first!' });
+      return res.status(400).json({ message: 'Topic not found or no studied topics available.' });
     }
 
     // Sort by priority: high first, then medium, then low

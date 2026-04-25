@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { t } from '../utils/i18n';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { cacheQuiz, cacheExplanation, removeFromCache, getAllCachedTopics } from '../utils/indexedDB';
 
 const Syllabus = () => {
   const { user, refreshUser } = useAuth();
@@ -20,6 +21,9 @@ const Syllabus = () => {
   const [syllabi, setSyllabi] = useState([]);
   const [activeSyllabusId, setActiveSyllabusId] = useState('');
   const [expandedNodes, setExpandedNodes] = useState({});
+  const [cachedTopics, setCachedTopics] = useState([]);
+  const [cachingStatus, setCachingStatus] = useState({}); // { topicName: 'loading' | 'done' | 'error' }
+
   const toggleNode = (id) => setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
 
   // Fetch syllabus on mount
@@ -32,6 +36,9 @@ const Syllabus = () => {
           setSyllabi(res.syllabi || []);
           setActiveSyllabusId(res.activeSyllabusId || '');
         }
+        // Load cached topics
+        const cached = await getAllCachedTopics();
+        setCachedTopics(cached);
       } catch (err) {
         console.error('Fetch syllabus error:', err);
       } finally {
@@ -128,6 +135,43 @@ const Syllabus = () => {
       setData(res.subjects);
     } catch (err) {
       console.error('Confidence error:', err);
+    }
+  };
+
+  const handleOfflineToggle = async (topic, subjectName, unitName) => {
+    if (cachedTopics.includes(topic)) {
+      await removeFromCache(topic);
+      setCachedTopics(prev => prev.filter(t => t !== topic));
+      return;
+    }
+
+    if (cachedTopics.length >= 5) {
+      alert('Offline limit reached (5 topics). Uncheck another topic first.');
+      return;
+    }
+
+    setCachingStatus(prev => ({ ...prev, [topic]: 'loading' }));
+    try {
+      // 1. Mark as studied first so backend allows quiz generation
+      await axios.put('/api/tracker/tick', { subject: subjectName, unit: unitName, topic, studied: true });
+      
+      // 2. Pre-fetch quiz (10 questions)
+      const { data: quizRes } = await axios.post('/api/quiz/generate', { 
+        topic, 
+        count: 10,
+        subject: subjectName
+      });
+      await cacheQuiz(topic, quizRes.questions);
+
+      // 3. Pre-fetch explanation (Skip streaming endpoint for now, use placeholder)
+      await cacheExplanation(topic, "Offline summary generated. Connect to internet for deep-dive chat.");
+
+      setCachedTopics(prev => [...prev, topic]);
+      setCachingStatus(prev => ({ ...prev, [topic]: 'done' }));
+    } catch (err) {
+      console.error('Caching error:', err);
+      setCachingStatus(prev => ({ ...prev, [topic]: 'error' }));
+      alert('Failed to cache topic. Are you online?');
     }
   };
 
@@ -255,6 +299,17 @@ const Syllabus = () => {
         </div>
         <button className="btn-secondary" onClick={() => { setData(null); }}>Upload New Syllabus</button>
       </div>
+
+      <div className="card" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--accent-light)', border: '1px solid var(--accent)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '20px' }}>💾</span>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 'var(--text-sm)' }}>Offline Mode Ready</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>You can study these topics even without internet.</div>
+          </div>
+        </div>
+        <div style={{ fontWeight: 700, color: 'var(--accent)' }}>{cachedTopics.length} / 5 Topics</div>
+      </div>
       
       {data.map((subject, sIdx) => {
         const subjId = `subj-${sIdx}`;
@@ -302,8 +357,29 @@ const Syllabus = () => {
                                     {t(c, lang)}
                                   </span>
                                 ))}
+                                
+                                <div 
+                                  onClick={() => handleOfflineToggle(topic.name, subject.name, unit.name)}
+                                  style={{ 
+                                    cursor: 'pointer', 
+                                    padding: '4px 8px', 
+                                    borderRadius: '4px', 
+                                    fontSize: '11px',
+                                    background: cachedTopics.includes(topic.name) ? 'var(--accent)' : 'transparent',
+                                    color: cachedTopics.includes(topic.name) ? 'white' : 'var(--text-muted)',
+                                    border: `1px solid ${cachedTopics.includes(topic.name) ? 'var(--accent)' : 'var(--border)'}`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {cachingStatus[topic.name] === 'loading' ? '⌛' : '💾'} 
+                                  {cachedTopics.includes(topic.name) ? 'Saved' : 'Save Offline'}
+                                </div>
+
                                 <button onClick={() => navigate(`/notes?topic=${encodeURIComponent(topic.name)}&subject=${encodeURIComponent(subject.name)}&unit=${encodeURIComponent(unit.name)}`)}
-                                  className="btn-secondary" style={{ padding: '4px 8px', fontSize: '11px', marginLeft: '8px' }}>
+                                  className="btn-secondary" style={{ padding: '4px 8px', fontSize: '11px' }}>
                                   {t('generate_notes', lang)}
                                 </button>
                               </div>

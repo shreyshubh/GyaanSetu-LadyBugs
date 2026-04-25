@@ -9,11 +9,26 @@ const cleanJsonResponse = (text) => {
 };
 
 const safeParseJson = (text) => {
-  const cleaned = cleanJsonResponse(text);
-  try { return JSON.parse(cleaned); } catch (e) {
-    const m = cleaned.match(/\[[\s\S]*\]/) || cleaned.match(/\{[\s\S]*\}/);
-    if (m) return JSON.parse(m[0]);
-    throw e;
+  let cleaned = cleanJsonResponse(text);
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Attempt to fix common "Bad control character" issues (raw newlines/tabs inside strings)
+    const sanitized = cleaned.replace(/[\u0000-\u001F]+/g, (match) => {
+      if (match.includes('\n')) return '\\n';
+      if (match.includes('\t')) return '\\t';
+      return '';
+    });
+    
+    try {
+      return JSON.parse(sanitized);
+    } catch (e2) {
+      const m = sanitized.match(/\[[\s\S]*\]/) || sanitized.match(/\{[\s\S]*\}/);
+      if (m) {
+        try { return JSON.parse(m[0]); } catch {}
+      }
+      throw e;
+    }
   }
 };
 
