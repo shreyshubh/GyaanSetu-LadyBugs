@@ -67,8 +67,8 @@ const Career = () => {
       <style>{`@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }`}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <h1 style={{ fontSize: 'var(--text-xl)', margin: 0 }}>{t('career_guidance', lang)}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--section-gap)', flexWrap: 'wrap', gap: 'clamp(8px, 2vw, 16px)' }}>
+        <h1 style={{ margin: 0 }}>{t('career_guidance', lang)}</h1>
         <button className="btn-primary" onClick={() => fetchGuidance(true)} disabled={loading}>
           {t('recalculate_career_map', lang)}
         </button>
@@ -92,8 +92,8 @@ const Career = () => {
       {activeSection === 'roles' && (
         <div style={{ display: 'grid', gap: '24px' }}>
           {roles.map((role, idx) => (
-            <div key={idx} className="card" style={{ padding: '28px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
+            <div key={idx} className="card" style={{ padding: 'clamp(16px, 4vw, 28px)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: 'clamp(8px, 2vw, 16px)' }}>
                 <div>
                   <h3 style={{ fontSize: 'var(--text-lg)', margin: '0 0 4px 0' }}>{role.title}</h3>
                   <span className="tag" style={{ background: role.status === 'ready' ? 'var(--success)' : 'var(--warning)', color: '#fff', border: 'none', fontSize: 'var(--text-xs)' }}>
@@ -115,7 +115,7 @@ const Career = () => {
 
               {/* Salary data */}
               {role.avg_lpa && (
-                <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ background: 'var(--bg)', borderRadius: '12px', padding: 'clamp(8px, 2vw, 12px) clamp(12px, 2vw, 16px)', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'clamp(8px, 2vw, 16px)' }}>
                   <div>
                     <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                       {lang === 'hi' ? '💰 वेतन (भारत)' : '💰 Salary (India)'}
@@ -227,8 +227,8 @@ const Career = () => {
               <h3 style={{ fontSize: 'var(--text-md)', marginBottom: '12px' }}>{r.topic}</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {(r.videos || []).map((vid, vi) => (
-                  <a key={vi} href={vid.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '8px', borderRadius: '12px', background: 'var(--bg)', textDecoration: 'none', color: 'var(--text-primary)', transition: 'all 250ms ease' }}>
-                    {vid.thumbnail && <img src={vid.thumbnail} alt="" style={{ width: '80px', height: '45px', borderRadius: '6px', objectFit: 'cover' }} />}
+                  <a key={vi} href={vid.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: 'clamp(8px, 2vw, 12px)', alignItems: 'center', padding: '8px', borderRadius: '12px', background: 'var(--bg)', textDecoration: 'none', color: 'var(--text-primary)', transition: 'all 250ms ease', flexWrap: 'wrap' }}>
+                    {vid.thumbnail && <img src={vid.thumbnail} alt="" style={{ width: 'clamp(60px, 15vw, 80px)', height: 'auto', aspectRatio: '16/9', borderRadius: '6px', objectFit: 'cover' }} />}
                     <div>
                       <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>{vid.title}</div>
                       <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{vid.channelTitle}</div>

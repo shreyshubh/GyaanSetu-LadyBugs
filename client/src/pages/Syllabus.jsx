@@ -198,15 +198,15 @@ const Syllabus = () => {
   }, [cachedTopics, lang]);
 
   if (loading) {
-    return <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading', lang)}</div>;
+    return <div style={{ padding: 'clamp(2rem, 8vw, 4rem)', textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading', lang)}</div>;
   }
 
   // Show parsed syllabus for review before saving
   if (parsedTopics) {
     return (
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '16px' }}>{t('syllabus', lang)}</h1>
-      <div className="card" style={{ padding: '32px' }}>
+        <h1 style={{ marginBottom: '16px' }}>{t('syllabus', lang)}</h1>
+      <div className="card">
         <h2 style={{ marginBottom: '24px' }}>{t('confirm_syllabus', lang)}</h2>
         <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('syllabus_name', lang)}</label>
@@ -262,7 +262,7 @@ const Syllabus = () => {
             );
           })}
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button className="btn-primary" onClick={handleSave} disabled={saving}>
             {saving ? t('saving', lang) : t('save_start_learning', lang)}
           </button>
@@ -277,7 +277,7 @@ const Syllabus = () => {
   if (!data || data.length === 0) {
     return (
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('syllabus', lang)}</h1>
+        <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('syllabus', lang)}</h1>
         <input type="file" ref={fileInputRef} accept=".pdf,.docx" style={{ display: 'none' }}
           onChange={e => handleUpload(e.target.files[0])} />
         <div 
@@ -286,7 +286,7 @@ const Syllabus = () => {
           onDrop={e => { e.preventDefault(); handleUpload(e.dataTransfer.files[0]); }}
           style={{ 
             border: '2px dashed var(--border)', borderRadius: '6px', 
-            padding: '64px 32px', textAlign: 'center', cursor: 'pointer',
+            padding: 'clamp(2rem, 8vw, 4rem) clamp(1rem, 4vw, 2rem)', textAlign: 'center', cursor: 'pointer',
             background: 'var(--surface)', opacity: uploading ? 0.5 : 1
           }}>
           <div style={{ fontSize: '32px', marginBottom: '16px' }}>📄</div>
@@ -303,9 +303,9 @@ const Syllabus = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>{t('syllabus', lang)}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--section-gap)', flexWrap: 'wrap', gap: 'clamp(8px, 2vw, 16px)' }}>
+        <div style={{ minWidth: 0 }}>
+          <h1 style={{ margin: 0 }}>{t('syllabus', lang)}</h1>
           {syllabi.length > 0 && (
             <select 
               className="input" 
@@ -319,7 +319,7 @@ const Syllabus = () => {
             </select>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button className="btn-secondary" onClick={() => { setData(null); }}>{t('upload_new_syllabus', lang)}</button>
           <button className="btn-secondary" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }} onClick={() => setDeleteConfirm('all')} disabled={deleting}>
             {lang === 'hi' ? '🗑 सब हटाएं' : '🗑 Delete All'}
@@ -437,17 +437,17 @@ const Syllabus = () => {
 // Optimization: Memoize TopicRow to prevent massive re-renders of the syllabus tree
 const TopicRow = memo(({ topic, subjectName, unitName, lang, handleTick, handleConfidence, handleOfflineToggle, isCached, cachingStatus, navigate }) => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--bg)', borderRadius: '8px', flexWrap: 'wrap', gap: '12px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(6px, 1.5vw, 8px)', background: 'var(--bg)', borderRadius: '8px', flexWrap: 'wrap', gap: 'clamp(8px, 2vw, 12px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', minWidth: 0 }}>
         <input type="checkbox" checked={topic.studied || false}
           onChange={e => handleTick(subjectName, unitName, topic.name, e.target.checked)}
-          style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }} />
-        <span style={{ fontWeight: 500 }}>{topic.name}</span>
+          style={{ width: '20px', height: '20px', margin: 0, cursor: 'pointer', flexShrink: 0 }} />
+        <span style={{ fontWeight: 500, fontSize: 'clamp(0.8rem, 2vw, 0.95rem)', overflowWrap: 'anywhere', minWidth: 0 }}>{topic.name}</span>
       </div>
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 'clamp(4px, 1vw, 8px)', alignItems: 'center', flexWrap: 'wrap' }}>
         {['confident', 'neutral', 'weak'].map(c => (
           <span key={c} className={`tag tag-${c}`}
-            style={{ opacity: topic.confidence === c ? 1 : 0.3, cursor: 'pointer' }}
+            style={{ opacity: topic.confidence === c ? 1 : 0.3, cursor: 'pointer', minHeight: '32px', display: 'inline-flex', alignItems: 'center' }}
             onClick={() => handleConfidence(subjectName, unitName, topic.name, c)}>
             {t(c, lang)}
           </span>
@@ -459,14 +459,15 @@ const TopicRow = memo(({ topic, subjectName, unitName, lang, handleTick, handleC
             cursor: 'pointer', 
             padding: '4px 8px', 
             borderRadius: '4px', 
-            fontSize: '11px',
+            fontSize: 'clamp(0.6rem, 1.5vw, 0.7rem)',
             background: isCached ? 'var(--accent)' : 'transparent',
             color: isCached ? 'white' : 'var(--text-muted)',
             border: `1px solid ${isCached ? 'var(--accent)' : 'var(--border)'}`,
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            minHeight: '32px'
           }}
         >
           {cachingStatus === 'loading' ? '⌛' : '💾'} 
@@ -474,7 +475,7 @@ const TopicRow = memo(({ topic, subjectName, unitName, lang, handleTick, handleC
         </div>
 
         <button onClick={() => navigate(`/notes?topic=${encodeURIComponent(topic.name)}&subject=${encodeURIComponent(subjectName)}&unit=${encodeURIComponent(unitName)}`)}
-          className="btn-secondary" style={{ padding: '4px 8px', fontSize: '11px' }}>
+          className="btn-secondary" style={{ padding: '4px 8px', fontSize: 'clamp(0.6rem, 1.5vw, 0.7rem)', minHeight: '32px' }}>
           {t('generate_notes', lang)}
         </button>
       </div>

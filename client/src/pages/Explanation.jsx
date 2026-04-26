@@ -6,15 +6,21 @@ import axios from 'axios';
 
 const styleSheet = `@keyframes blink { 50% { opacity: 0; } }
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
-.explanation-layout { display: flex; gap: 24px; height: calc(100vh - 64px); }
-.history-panel { flex: 0 0 22%; overflow-y: auto; display: flex; flex-direction: column; padding: 20px; }
-.context-panel { flex: 0 0 25%; overflow-y: auto; display: flex; flex-direction: column; }
-.chat-panel { flex: 1; display: flex; flex-direction: column; padding: 0; }
+.explanation-layout { display: flex; gap: clamp(12px, 2vw, 24px); height: calc(100vh - 64px); overflow: hidden; }
+.history-panel { flex: 0 0 22%; overflow-y: auto; display: flex; flex-direction: column; padding: clamp(12px, 2vw, 20px); min-width: 0; }
+.context-panel { flex: 0 0 25%; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+.chat-panel { flex: 1; display: flex; flex-direction: column; padding: 0; min-width: 0; }
 @media (max-width: 1024px) {
-  .explanation-layout { flex-direction: column; height: auto; min-height: calc(100vh - 64px); }
-  .history-panel { flex: none; height: 250px; }
-  .context-panel { flex: none; height: 250px; }
-  .chat-panel { flex: none; min-height: 60vh; }
+  .explanation-layout { flex-direction: column; height: auto; min-height: calc(100vh - 64px); overflow: visible; }
+  .history-panel { flex: none; max-height: 220px; }
+  .context-panel { flex: none; max-height: 220px; }
+  .chat-panel { flex: none; min-height: 50vh; }
+}
+@media (max-width: 768px) {
+  .explanation-layout { gap: 12px; min-height: auto; padding-bottom: 72px; }
+  .history-panel { max-height: 180px; padding: 12px; }
+  .context-panel { max-height: 180px; }
+  .chat-panel { min-height: 40vh; }
 }`;
 
 const Explanation = () => {
@@ -292,19 +298,19 @@ const Explanation = () => {
 
       {/* RIGHT PANEL — Chat */}
       <div className="card chat-panel">
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{currentTopic || t('ask_anything', lang)}</h2>
-            {activeContext.subject && (<div style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', marginTop: '2px' }}>{activeContext.subject} › {activeContext.unit}</div>)}
+        <div style={{ padding: 'clamp(12px, 3vw, 20px) clamp(12px, 3vw, 24px)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ fontSize: 'clamp(1rem, 3vw, 1.4rem)', margin: 0, overflowWrap: 'anywhere' }}>{currentTopic || t('ask_anything', lang)}</h2>
+            {activeContext.subject && (<div style={{ color: 'var(--text-secondary)', fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', marginTop: '2px' }}>{activeContext.subject} › {activeContext.unit}</div>)}
           </div>
-          <span className="tag" style={{ background: 'var(--accent)', color: 'white', border: 'none' }}>{t('ai_tutor', lang)}</span>
+          <span className="tag" style={{ background: 'var(--accent)', color: 'white', border: 'none', flexShrink: 0 }}>{t('ai_tutor', lang)}</span>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(12px, 3vw, 24px)', display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 24px)' }}>
           {messages.map((msg, idx) => (
             <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>{msg.role === 'user' ? user?.name : t('gyaansetu_ai', lang)}</div>
-              <div style={{ position: 'relative', background: msg.role === 'user' ? 'var(--accent-light)' : 'var(--surface)', border: msg.role === 'assistant' ? '1px solid var(--border)' : 'none', padding: '12px 16px', borderRadius: '6px', maxWidth: '80%', whiteSpace: 'pre-wrap' }}>
+              <div style={{ position: 'relative', background: msg.role === 'user' ? 'var(--accent-light)' : 'var(--surface)', border: msg.role === 'assistant' ? '1px solid var(--border)' : 'none', padding: 'clamp(8px, 2vw, 12px) clamp(10px, 2vw, 16px)', borderRadius: '6px', maxWidth: 'min(85%, 600px)', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', wordBreak: 'break-word', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>
                 {msg.content}
                 {msg.role === 'assistant' && msg.content && (
                   <button onClick={() => handleReadAloud(msg.content)} style={{ position: 'absolute', top: '8px', right: '-40px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', color: 'var(--text-muted)' }} title="Read Aloud">🔊</button>
@@ -331,9 +337,9 @@ const Explanation = () => {
           <div style={{ padding: '8px 14px', margin: '0 24px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', transition: 'opacity 250ms' }}>{voiceStatus}</div>
         )}
 
-        <div style={{ padding: '24px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
-          {voiceError && <div style={{ color: 'var(--danger)', fontSize: 'var(--text-xs)', marginBottom: '8px' }}>{voiceError}</div>}
-          <form style={{ display: 'flex', gap: '12px' }} onSubmit={handleSend}>
+        <div style={{ padding: 'clamp(12px, 3vw, 24px)', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+          {voiceError && <div style={{ color: 'var(--danger)', fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', marginBottom: '8px' }}>{voiceError}</div>}
+          <form style={{ display: 'flex', gap: 'clamp(6px, 1.5vw, 12px)', flexWrap: 'wrap' }} onSubmit={handleSend}>
             <input type="text" placeholder={t('ask_question_placeholder', lang)} value={inputText} onChange={e => setInputText(e.target.value)} disabled={isStreaming} style={{ flex: 1, color: isRecording ? 'var(--text-muted)' : 'var(--text-primary)' }} />
             {/* Mic button */}
             <button type="button" onClick={startRecording} title={lang === 'hi' ? 'अपनी आवाज़ से पूछें' : 'Ask with your voice'}

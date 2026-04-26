@@ -46,38 +46,38 @@ const Profile = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)' }}>{initials}</div>
-          <div>
-            <h1 style={{ fontSize: 'var(--text-2xl)' }}>{user?.name}</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{user?.email}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--section-gap)', gap: 'clamp(12px, 3vw, 24px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 3vw, 24px)', minWidth: 0 }}>
+          <div style={{ width: 'clamp(56px, 15vw, 80px)', height: 'clamp(56px, 15vw, 80px)', borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 'clamp(1rem, 4vw, 1.5rem)', flexShrink: 0 }}>{initials}</div>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name}</h1>
+            <p style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
           </div>
         </div>
         <button onClick={logout} className="btn-secondary">{t('log_out', lang)}</button>
       </div>
 
-      <div className="grid-4" style={{ marginBottom: '48px' }}>
+      <div className="grid-4" style={{ marginBottom: 'var(--section-gap)' }}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)' }}>🔥 {g.current_streak || 0}</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('streak', lang)}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(1.8rem, 5vw, 3rem)' }}>🔥 {g.current_streak || 0}</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('streak', lang)}</div>
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)' }}>{g.longest_streak || 0}</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('longest_streak', lang)}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(1.8rem, 5vw, 3rem)' }}>{g.longest_streak || 0}</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('longest_streak', lang)}</div>
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)' }}>{g.total_topics_studied || 0}</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('topics_studied', lang)}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(1.8rem, 5vw, 3rem)' }}>{g.total_topics_studied || 0}</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('topics_studied', lang)}</div>
         </div>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)' }}>{g.total_quizzes_taken || 0}</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('quizzes_taken', lang)}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(1.8rem, 5vw, 3rem)' }}>{g.total_quizzes_taken || 0}</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('quizzes_taken', lang)}</div>
         </div>
       </div>
 
-      <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '16px' }}>{t('badges', lang)}</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px' }}>
+      <h2 style={{ marginBottom: '16px' }}>{t('badges', lang)}</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(120px, 100%), 1fr))', gap: 'clamp(8px, 2vw, 16px)' }}>
         {badges.map(badge => {
           const badgePath = `../assets/BADGES/${badge.name.toUpperCase()}.webp`;
           const badgeImg = badgeImages[badgePath];
@@ -90,9 +90,9 @@ const Profile = () => {
               data-description={desc}
             >
               {!badge.earned && <div style={{ position: 'absolute', top: '10px', right: '12px', fontSize: '12px', opacity: 0.4 }}>🔒</div>}
-              <div style={{ marginBottom: '12px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: badge.earned ? 1 : 0.25, filter: badge.earned ? 'none' : 'grayscale(100%)' }}>
+              <div style={{ marginBottom: '12px', height: 'clamp(48px, 12vw, 64px)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: badge.earned ? 1 : 0.25, filter: badge.earned ? 'none' : 'grayscale(100%)' }}>
                 {badgeImg ? (
-                  <img src={badgeImg} alt={badge.name} style={{ maxWidth: '80px', maxHeight: '80px', objectFit: 'contain' }} />
+                  <img src={badgeImg} alt={badge.name} style={{ maxWidth: 'clamp(56px, 14vw, 80px)', maxHeight: 'clamp(56px, 14vw, 80px)', objectFit: 'contain' }} />
                 ) : (
                   <span className="badge-icon">{badge.icon}</span>
                 )}

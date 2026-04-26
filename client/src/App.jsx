@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { t } from './utils/i18n';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import useOfflineSync from './hooks/useOfflineSync';
@@ -26,9 +26,39 @@ const OfflineBanner = () => {
   const text = !isOnline ? `⚡ ${t('you_are_offline', lang)}` : syncStatus === 'syncing' ? `🔄 ${t('syncing', lang)}` : syncStatus === 'synced' ? `✅ ${t('synced', lang)}!` : `❌ ${t('sync_failed', lang)}`;
 
   return (
-    <div style={{ position: 'sticky', top: 0, left: 0, right: 0, zIndex: 9999, background: bg, color: '#fff', textAlign: 'center', padding: '8px', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>
+    <div style={{ position: 'sticky', top: 0, left: 0, right: 0, zIndex: 9999, background: bg, color: '#fff', textAlign: 'center', padding: '6px 12px', fontFamily: 'var(--font-mono)', fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)' }}>
       {text}
     </div>
+  );
+};
+
+const BottomNav = () => {
+  const { user } = useAuth();
+  const lang = user?.language || 'en';
+  
+  return (
+    <nav className="bottom-nav">
+      <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>
+        <span className="bottom-nav-icon">📊</span>
+        <span>{t('dashboard', lang)}</span>
+      </NavLink>
+      <NavLink to="/syllabus" className={({ isActive }) => isActive ? 'active' : ''}>
+        <span className="bottom-nav-icon">📚</span>
+        <span>{t('syllabus', lang)}</span>
+      </NavLink>
+      <NavLink to="/quiz" className={({ isActive }) => isActive ? 'active' : ''}>
+        <span className="bottom-nav-icon">✏️</span>
+        <span>{t('quiz', lang)}</span>
+      </NavLink>
+      <NavLink to="/explanation" className={({ isActive }) => isActive ? 'active' : ''}>
+        <span className="bottom-nav-icon">💡</span>
+        <span>{t('explanation', lang)}</span>
+      </NavLink>
+      <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
+        <span className="bottom-nav-icon">👤</span>
+        <span>{t('profile', lang)}</span>
+      </NavLink>
+    </nav>
   );
 };
 
@@ -48,12 +78,13 @@ const ProtectedRoute = ({ children }) => {
         <button 
           className="mobile-menu-btn" 
           onClick={() => setSidebarOpen(true)}
-          style={{ display: 'none', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', marginBottom: '24px' }}
+          style={{ display: 'none', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', marginBottom: '16px', minHeight: '44px', minWidth: '44px' }}
         >
           ☰
         </button>
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 };
@@ -62,7 +93,6 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <OfflineBanner />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

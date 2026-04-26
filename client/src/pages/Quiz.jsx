@@ -132,17 +132,17 @@ const Quiz = () => {
   };
 
   if (results) return (
-    <div>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('quiz_results', lang)}</h1>
-      <div className="card" style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-3xl)', color: results.scorePercent >= 70 ? 'var(--success)' : 'var(--danger)', marginBottom: '8px' }}>{results.scorePercent}%</div>
+    <div style={{ width: '100%', maxWidth: '720px', margin: '0 auto' }}>
+      <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('quiz_results', lang)}</h1>
+      <div className="card" style={{ textAlign: 'center', marginBottom: 'clamp(16px, 4vw, 32px)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(2rem, 8vw, 3rem)', color: results.scorePercent >= 70 ? 'var(--success)' : 'var(--danger)', marginBottom: '8px' }}>{results.scorePercent}%</div>
         <div style={{ color: 'var(--text-secondary)' }}>{t('level', lang)}: {results.level}</div>
       </div>
       {results.results.map((r, i) => (
         <div key={i} className="card" style={{ marginBottom: '12px', borderLeft: `3px solid ${r.score >= 70 ? 'var(--success)' : 'var(--danger)'}` }}>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>{r.topic}</div>
-          <div style={{ marginBottom: '4px' }}>{questions[i]?.question}</div>
-          <div style={{ color: r.score >= 70 ? 'var(--success)' : 'var(--danger)', fontSize: 'var(--text-sm)' }}>{r.feedback}</div>
+          <div style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', color: 'var(--text-muted)', marginBottom: '4px' }}>{r.topic}</div>
+          <div style={{ marginBottom: '4px', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>{questions[i]?.question}</div>
+          <div style={{ color: r.score >= 70 ? 'var(--success)' : 'var(--danger)', fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)' }}>{r.feedback}</div>
         </div>
       ))}
       <button className="btn-primary" onClick={() => { setQuestions([]); setResults(null); }} style={{ width: '100%', marginTop: '24px' }}>{t('take_another_quiz', lang)}</button>
@@ -158,15 +158,15 @@ const Quiz = () => {
 
     return (
       <div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('quiz', lang)}</h1>
+        <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('quiz', lang)}</h1>
         {subjects.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: '48px' }}><p style={{ color: 'var(--text-muted)' }}>{t('upload_syllabus_first', lang)}</p></div>
+          <div className="card" style={{ textAlign: 'center', padding: 'clamp(2rem, 6vw, 3rem)' }}><p style={{ color: 'var(--text-muted)' }}>{t('upload_syllabus_first', lang)}</p></div>
         ) : (
-          <div className="card" style={{ maxWidth: '600px', margin: '0 auto', padding: '32px' }}>
-            <h2 style={{ fontSize: 'var(--text-lg)', marginBottom: '24px' }}>{t('configure_quiz', lang)}</h2>
+          <div className="card" style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+            <h2 style={{ marginBottom: '24px' }}>{t('configure_quiz', lang)}</h2>
             
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('select_subject', lang)}</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: 'clamp(0.8rem, 2vw, 0.875rem)' }}>{t('select_subject', lang)}</label>
               <select className="input" value={selectedSubject} onChange={e => { setSelectedSubject(e.target.value); setSelectedTopic(''); }} style={{ width: '100%' }}>
                 <option value="">{t('all_subjects', lang)}</option>
                 {subjects.map((s, i) => <option key={i} value={s.name}>{s.name}</option>)}
@@ -174,7 +174,7 @@ const Quiz = () => {
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('select_topic_optional', lang)}</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: 'clamp(0.8rem, 2vw, 0.875rem)' }}>{t('select_topic_optional', lang)}</label>
               <select className="input" value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={{ width: '100%' }}>
                 <option value="">{t('all_topics_subject', lang)}</option>
                 {allTopics.map((t, i) => <option key={i} value={t.name}>{t.name}</option>)}
@@ -182,13 +182,13 @@ const Quiz = () => {
             </div>
 
             <div style={{ marginBottom: '32px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('question_count', lang)}</label>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: 'clamp(0.8rem, 2vw, 0.875rem)' }}>{t('question_count', lang)}</label>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 {[10, 18, 25].map(c => (
                   <button 
                     key={c} 
                     className={qCount === c ? "btn-primary" : "btn-secondary"} 
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: '60px' }}
                     onClick={() => setQCount(c)}
                   >
                     {c}
@@ -202,8 +202,8 @@ const Quiz = () => {
             </button>
 
             {cachedTopics.length > 0 && (
-              <div style={{ marginTop: '40px' }}>
-                <h3 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>{t('ready_offline_study', lang)}</h3>
+              <div style={{ marginTop: 'var(--section-gap)' }}>
+                <h3 style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>{t('ready_offline_study', lang)}</h3>
                 <div className="grid-2" style={{ gap: '12px' }}>
                   {cachedTopics.map((topic, i) => (
                     <div 
@@ -212,7 +212,7 @@ const Quiz = () => {
                       onClick={() => startQuiz(topic)}
                       style={{ padding: '12px', cursor: 'pointer', border: '1px solid var(--accent)', background: 'var(--accent-light)', position: 'relative' }}
                     >
-                      <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>{topic}</div>
+                      <div style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)', fontWeight: 600 }}>{topic}</div>
                       <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: '4px' }}>💾 {t('available_offline', lang)}</div>
                     </div>
                   ))}
@@ -227,29 +227,29 @@ const Quiz = () => {
 
   return (
     <div>
-      <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: '32px' }}>{t('quiz', lang)}</h1>
-      <div className="card" style={{ padding: 0, overflow: 'hidden', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ width: '100%', height: '2px', background: 'var(--border)' }}>
+      <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('quiz', lang)}</h1>
+      <div className="card" style={{ padding: 0, overflow: 'hidden', width: '100%', maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ width: '100%', height: '4px', background: 'var(--border)' }}>
           <div style={{ height: '100%', width: `${(timeLeft / 30) * 100}%`, background: timeLeft < 10 ? 'var(--danger)' : 'var(--accent)', transition: 'width 1s linear, background 0.3s' }} />
         </div>
-        <div style={{ padding: '32px' }}>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+        <div style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
+          <div style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             {t('question', lang)} {currentIdx + 1}/{questions.length} • {currentQ?.topic}
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', marginBottom: '32px' }}>{currentQ?.question}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', marginBottom: 'clamp(16px, 4vw, 32px)', lineHeight: 1.4 }}>{currentQ?.question}</div>
           {currentQ?.type === 'mcq' ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: 'clamp(16px, 4vw, 32px)' }}>
               {currentQ.options?.map((opt, idx) => {
                 let bc = 'var(--border)', bg = 'var(--surface)';
                 if (submitted) { if (idx === currentQ.correctIndex) { bc = 'var(--success)'; bg = '#E6F4ED'; } else if (selected === idx) { bc = 'var(--danger)'; bg = '#FDECEA'; } }
                 else if (selected === idx) { bc = 'var(--accent)'; bg = 'var(--accent-light)'; }
-                return <div key={idx} onClick={() => !submitted && setSelected(idx)} style={{ border: `1px solid ${bc}`, background: bg, padding: '16px', borderRadius: '6px', cursor: submitted ? 'default' : 'pointer' }}>{opt}</div>;
+                return <div key={idx} onClick={() => !submitted && setSelected(idx)} style={{ border: `1px solid ${bc}`, background: bg, padding: 'clamp(12px, 3vw, 16px)', borderRadius: '6px', cursor: submitted ? 'default' : 'pointer', minHeight: '52px', display: 'flex', alignItems: 'center', fontSize: 'clamp(0.85rem, 2vw, 1rem)' }}>{opt}</div>;
               })}
             </div>
           ) : (
             <textarea value={textAnswer} onChange={e => setTextAnswer(e.target.value)} disabled={submitted}
               placeholder={currentQ?.type === 'coding' ? t('write_code', lang) : t('type_answer', lang)}
-              style={{ width: '100%', minHeight: '120px', marginBottom: '32px', padding: '16px', borderRadius: '6px', border: '1px solid var(--border)', fontFamily: currentQ?.type === 'coding' ? 'var(--font-mono)' : 'var(--font-body)', background: currentQ?.type === 'coding' ? 'var(--code-bg)' : 'var(--surface)', resize: 'vertical' }} />
+              style={{ width: '100%', minHeight: 'clamp(100px, 30vh, 200px)', marginBottom: 'clamp(16px, 4vw, 32px)', padding: '16px', borderRadius: '6px', border: '1px solid var(--border)', fontFamily: currentQ?.type === 'coding' ? 'var(--font-mono)' : 'var(--font-body)', background: currentQ?.type === 'coding' ? 'var(--code-bg)' : 'var(--surface)', resize: 'vertical' }} />
           )}
           {!submitted ? (
             <button className="btn-primary" onClick={handleSubmitAnswer} disabled={currentQ?.type === 'mcq' ? selected === null : !textAnswer.trim()} style={{ width: '100%' }}>{t('submit_answer', lang)}</button>
