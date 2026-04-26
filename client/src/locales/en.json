@@ -135,5 +135,11 @@
   "per_year": "year",
   "delete_all": "Delete All",
   "confirm_delete_all": "Delete the entire syllabus and all embeddings?",
-  "yes_delete": "Yes, Delete"
+  "yes_delete": "Yes, Delete",
+  "quiz_history": "Quiz History",
+  "view_answers": "View Answers",
+  "close": "Close",
+  "correct_answer": "Correct Answer",
+  "your_answer": "Your Answer",
+  "feedback": "Feedback"
 }

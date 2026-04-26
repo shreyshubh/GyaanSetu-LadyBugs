@@ -104,21 +104,7 @@ router.post('/grade', protect, async (req, res) => {
 
     const scorePercent = totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0;
 
-    // Update quiz history
-    const topicsInQuiz = [...new Set(questions.map(q => q.topic))];
-    user.quiz_history.push({
-      subject: questions[0]?.topic || 'Mixed',
-      topics: topicsInQuiz,
-      score: scorePercent,
-      total: questions.length,
-      date: new Date(),
-      time_taken: timeTaken || 0
-    });
-
-    // Update gamification
-    user.gamification.total_quizzes_taken += 1;
-
-    // Update pacing level
+    // Update pacing level first to capture it in history
     const avgTime = timeTaken ? timeTaken / questions.length : user.pacing_profile.avg_time_per_q;
     user.pacing_profile.avg_time_per_q = avgTime;
     
@@ -131,6 +117,46 @@ router.post('/grade', protect, async (req, res) => {
       const idx = levels.indexOf(user.pacing_profile.level);
       if (idx < 2) user.pacing_profile.level = levels[idx + 1];
     }
+
+    // Update quiz history with detailed results
+    const topicsInQuiz = [...new Set(questions.map(q => q.topic))];
+    const quizResultsForHistory = results.map(r => {
+      const q = questions[r.questionIndex];
+      const userAns = answers.find(a => a.questionIndex === r.questionIndex);
+      let userAnsText = '';
+      let correctAnsText = '';
+      
+      if (q.type === 'mcq') {
+        userAnsText = userAns && userAns.answer !== undefined ? q.options[userAns.answer] : 'No answer';
+        correctAnsText = q.options[q.correctIndex];
+      } else {
+        userAnsText = userAns && userAns.answer ? userAns.answer : 'No answer';
+        correctAnsText = q.correctAnswer || 'Evaluated by AI';
+      }
+
+      return {
+        question: q.question,
+        topic: q.topic,
+        userAnswer: userAnsText,
+        correctAnswer: correctAnsText,
+        feedback: r.feedback,
+        score: r.score
+      };
+    });
+
+    user.quiz_history.push({
+      subject: questions[0]?.topic || 'Mixed',
+      topics: topicsInQuiz,
+      score: scorePercent,
+      total: questions.length,
+      level: user.pacing_profile.level,
+      date: new Date(),
+      time_taken: timeTaken || 0,
+      results: quizResultsForHistory
+    });
+
+    // Update gamification
+    user.gamification.total_quizzes_taken += 1;
 
     // Update last_tested on topics
     const activeSyllabus = user.getActiveSyllabus();

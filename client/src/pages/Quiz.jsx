@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { t } from '../utils/i18n';
 import axios from 'axios';
 import { getCachedQuiz, addToQueue, getAllCachedTopics } from '../utils/indexedDB';
+import { Link } from 'react-router-dom';
 
 const Quiz = () => {
   const { user, refreshUser } = useAuth();
@@ -25,6 +26,12 @@ const Quiz = () => {
   const [cachedTopics, setCachedTopics] = useState([]);
   const [quizCacheRAM, setQuizCacheRAM] = useState({}); // Optimization: RAM Cache
 
+  const getQuestionTime = (type) => {
+    if (type === 'coding') return 300;
+    if (type === 'theoretical' || type === 'theory') return 90;
+    return 30; // mcq defaults to 30s
+  };
+
   useEffect(() => {
     const loadCached = async () => {
       const cached = await getAllCachedTopics();
@@ -45,8 +52,9 @@ const Quiz = () => {
     
     // Instant RAM Cache Hit (Optimization)
     if (overrideTopic && quizCacheRAM[overrideTopic]) {
-      setQuestions(quizCacheRAM[overrideTopic].slice(0, qCount)); setCurrentIdx(0); setAnswers([]); setSelected(null);
-      setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
+      const qList = quizCacheRAM[overrideTopic].slice(0, qCount);
+      setQuestions(qList); setCurrentIdx(0); setAnswers([]); setSelected(null);
+      setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(getQuestionTime(qList[0]?.type));
       setQStart(Date.now()); setTotalStart(Date.now());
       return;
     }
@@ -60,14 +68,15 @@ const Quiz = () => {
         count: qCount 
       });
       setQuestions(data.questions); setCurrentIdx(0); setAnswers([]); setSelected(null);
-      setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
+      setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(getQuestionTime(data.questions[0]?.type));
       setQStart(Date.now()); setTotalStart(Date.now());
     } catch (err) { 
       // 2. Fallback to cache if offline or server error
       if (topicToUse && quizCacheRAM[topicToUse]) {
-        setQuestions(quizCacheRAM[topicToUse].slice(0, qCount));
+        const qList = quizCacheRAM[topicToUse].slice(0, qCount);
+        setQuestions(qList);
         setCurrentIdx(0); setAnswers([]); setSelected(null);
-        setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(30);
+        setTextAnswer(''); setSubmitted(false); setResults(null); setTimeLeft(getQuestionTime(qList[0]?.type));
         setQStart(Date.now()); setTotalStart(Date.now());
         setLoading(false);
         return;
@@ -96,7 +105,7 @@ const Quiz = () => {
   const handleNext = async () => {
     if (currentIdx < questions.length - 1) {
       setCurrentIdx(i => i + 1); setSelected(null); setTextAnswer('');
-      setSubmitted(false); setTimeLeft(30); setQStart(Date.now());
+      setSubmitted(false); setTimeLeft(getQuestionTime(questions[currentIdx + 1]?.type)); setQStart(Date.now());
     } else {
       setLoading(true);
       try {
@@ -145,7 +154,10 @@ const Quiz = () => {
           <div style={{ color: r.score >= 70 ? 'var(--success)' : 'var(--danger)', fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)' }}>{r.feedback}</div>
         </div>
       ))}
-      <button className="btn-primary" onClick={() => { setQuestions([]); setResults(null); }} style={{ width: '100%', marginTop: '24px' }}>{t('take_another_quiz', lang)}</button>
+      <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+        <button className="btn-primary" onClick={() => { setQuestions([]); setResults(null); }} style={{ flex: 1 }}>{t('take_another_quiz', lang)}</button>
+        <Link to="/quiz-history" className="btn-secondary" style={{ flex: 1, textAlign: 'center', padding: '16px', textDecoration: 'none' }}>{t('quiz_history', lang)}</Link>
+      </div>
     </div>
   );
 
@@ -158,7 +170,10 @@ const Quiz = () => {
 
     return (
       <div>
-        <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('quiz', lang)}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--section-gap)' }}>
+          <h1 style={{ margin: 0 }}>{t('quiz', lang)}</h1>
+          <Link to="/quiz-history" className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.875rem' }}>{t('quiz_history', lang)}</Link>
+        </div>
         {subjects.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 'clamp(2rem, 6vw, 3rem)' }}><p style={{ color: 'var(--text-muted)' }}>{t('upload_syllabus_first', lang)}</p></div>
         ) : (
@@ -230,7 +245,7 @@ const Quiz = () => {
       <h1 style={{ marginBottom: 'var(--section-gap)' }}>{t('quiz', lang)}</h1>
       <div className="card" style={{ padding: 0, overflow: 'hidden', width: '100%', maxWidth: '720px', margin: '0 auto' }}>
         <div style={{ width: '100%', height: '4px', background: 'var(--border)' }}>
-          <div style={{ height: '100%', width: `${(timeLeft / 30) * 100}%`, background: timeLeft < 10 ? 'var(--danger)' : 'var(--accent)', transition: 'width 1s linear, background 0.3s' }} />
+          <div style={{ height: '100%', width: `${(timeLeft / (currentQ ? getQuestionTime(currentQ.type) : 30)) * 100}%`, background: timeLeft < 10 ? 'var(--danger)' : 'var(--accent)', transition: 'width 1s linear, background 0.3s' }} />
         </div>
         <div style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
           <div style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>

@@ -64,8 +64,17 @@ const userSchema = new mongoose.Schema({
     topics: [String],
     score: Number,
     total: Number,
+    level: String,
     date: { type: Date, default: Date.now },
-    time_taken: Number
+    time_taken: Number,
+    results: [{
+      question: String,
+      topic: String,
+      userAnswer: mongoose.Schema.Types.Mixed,
+      correctAnswer: mongoose.Schema.Types.Mixed,
+      feedback: String,
+      score: Number
+    }]
   }],
 
   // Legacy simple explanation history (kept for backwards compat)

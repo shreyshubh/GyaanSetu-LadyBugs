@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../utils/i18n';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const badgeImages = import.meta.glob('../assets/BADGES/*.webp', { eager: true, import: 'default' });
 
@@ -74,6 +75,12 @@ const Profile = () => {
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(1.8rem, 5vw, 3rem)' }}>{g.total_quizzes_taken || 0}</div>
           <div style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.6rem, 1.5vw, 0.75rem)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('quizzes_taken', lang)}</div>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--section-gap)' }}>
+        <Link to="/quiz-history" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <span>📋</span> {t('quiz_history', lang)}
+        </Link>
       </div>
 
       <h2 style={{ marginBottom: '16px' }}>{t('badges', lang)}</h2>

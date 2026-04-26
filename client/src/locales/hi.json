@@ -135,5 +135,11 @@
   "per_year": "वर्ष",
   "delete_all": "सब हटाएं",
   "confirm_delete_all": "क्या आप पूरा पाठ्यक्रम और सभी एम्बेडिंग्स हटाना चाहते हैं?",
-  "yes_delete": "हाँ, हटाएं"
+  "yes_delete": "हाँ, हटाएं",
+  "quiz_history": "प्रश्नोत्तरी का इतिहास",
+  "view_answers": "उत्तर देखें",
+  "close": "बंद करें",
+  "correct_answer": "सही उत्तर",
+  "your_answer": "आपका उत्तर",
+  "feedback": "प्रतिक्रिया"
 }

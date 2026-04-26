@@ -14,6 +14,7 @@ import Explanation from './pages/Explanation';
 import Notes from './pages/Notes';
 import Landing from './pages/Landing';
 import Sidebar from './components/layout/Sidebar';
+import QuizHistory from './pages/QuizHistory';
 
 const OfflineBanner = () => {
   const { isOnline, syncStatus } = useOfflineSync();
@@ -104,6 +105,7 @@ function App() {
           <Route path="/career" element={<ProtectedRoute><Career /></ProtectedRoute>} />
           <Route path="/explanation" element={<ProtectedRoute><Explanation /></ProtectedRoute>} />
           <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+          <Route path="/quiz-history" element={<ProtectedRoute><QuizHistory /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
