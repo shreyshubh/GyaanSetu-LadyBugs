@@ -3,7 +3,7 @@
 ## TEAM CODE: UDB-Z3KF
 ## TEAM NAME: LADY BUGS
 ## PROBLEM STATEMENT - 01 
-### *"Hyper Personalized Learning Assistant for Underserved Students"*
+### *"Hyper Personalized Learning Assistant for Under-Served Students"*
 Build an AI system that adapts to a student's learning style, pace, and knowledge gaps — offering contextual explanations, quizzes, and career guidance for low-resource college students.
 
 **GyaanSetu** is an intelligent bridge that transforms static academic syllabi into dynamic, interactive learning journeys. By combining AI-driven tutoring with offline accessibility and personalized progress tracking, it directly solves the challenge of delivering high-quality, tailored education to underserved students.
